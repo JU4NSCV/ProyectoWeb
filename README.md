@@ -3,9 +3,9 @@
 > **Estado del Proyecto:** Desarrollo de MVP (Producto Mínimo Viable) para presentación de Agosto.
 
 ## 🔗 Recursos y Enlaces del Proyecto
-* 🚀 **Prototipo Interactivo (Replit):** [Ver Aplicación en Vivo ](https://replit.com/@tu-usuario/tu-proyecto) *(Simulación funcional con Mock Data)*
-* 📋 **Espacio de Trabajo (Notion):** [Acceder al Tablero de Notion](https://notion.so/tu-enlace-aqui) *(Gestión de tareas, requerimientos y backlog)*
-* 📂 **Repositorio de Documentos (OneDrive):** [Abrir Carpeta de OneDrive](https://onedrive.live.com/tu-enlace-aqui) *(Anexos, actas de reuniones y documentación formal)*
+* 🚀 **Prototipo Interactivo (Replit):** [Ver Aplicación en Vivo ]([https://replit.com/@tu-usuario/tu-proyecto](https://code-assistant--jscueva5.replit.app/)) *(Simulación funcional con Mock Data)*
+* 📋 **Espacio de Trabajo (Notion):** [Acceder al Tablero de Notion]([https://notion.so/tu-enlace-aqui](https://www.notion.so/Bazar-B2B-D2C-368f1460c6af804994deebf3e2505409?source=copy_link)) *(Gestión de tareas, requerimientos y backlog)*
+* 📂 **Repositorio de Documentos (OneDrive):** [Abrir Carpeta de OneDrive]([https://onedrive.live.com/tu-enlace-aqui](https://1drv.ms/f/c/f8eae564f6fb628e/IgCSiSOXw_r4QYW1xECX9052AQcpdDXc9iVqswX8ijBBHB4?e=OYMQ1r)) *(Anexos, actas de reuniones y documentación formal)*
 
 ---
 
