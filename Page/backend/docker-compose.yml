@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: bazar_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: bazar_db
+      POSTGRES_USER: bazar_admin
+      POSTGRES_PASSWORD: bazar_password
+    ports:
+      - "5432:5432" # Expone el puerto de Docker a tu máquina local (localhost)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

@@ -1,0 +1,73 @@
+# Global Git Ignore
+
+# dependencies and package manager caches
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+pnpm-debug.log*
+
+# testing and coverage
+coverage/
+htmlcov/
+.coverage
+.pytest_cache/
+
+# next.js build output
+.next/
+out/
+
+# production and compilation build artifacts
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# python environments
+entorno/
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# environment files (sensitive credentials)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*
+*.env
+
+# LaTeX auxiliary files (from PRESENTACION-1BIM/)
+*.aux
+*.log
+*.toc
+*.out
+*.synctex.gz
+missfont.log
+
+# IDEs, Editors, and OS Files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.DS_Store
+Thumbs.db
+*.pem
+*.key
