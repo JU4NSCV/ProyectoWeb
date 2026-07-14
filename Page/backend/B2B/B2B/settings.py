@@ -137,5 +137,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Le decimos a Django que este es el nuevo modelo de usuarios global
+# Le decimos a Django que este es el nuevo modelo de usuarios globals
 AUTH_USER_MODEL = 'users.CustomUser'
+
+# Permitir que el Frontend (localhost:3000) consuma nuestra API
+CORS_ALLOW_ALL_ORIGINS = True  # Ojo: En producción cambiaremos esto solo al dominio oficial

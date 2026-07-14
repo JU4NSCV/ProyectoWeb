@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: bazar_admin
       POSTGRES_PASSWORD: bazar_password
     ports:
-      - "5432:5432" # Expone el puerto de Docker a tu máquina local (localhost)
+      - "5433:5432" # Expone el puerto de Docker a tu máquina local (localhost)
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

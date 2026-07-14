@@ -8,10 +8,10 @@ Esta guía detalla los pasos necesarios para clonar y ejecutar este proyecto en 
 
 Asegúrate de tener instalados los siguientes programas en tu computadora:
 
-* **Git**: Para clonar el repositorio. [Descargar Git](https://git-scm.com/)
-* **Docker y Docker Compose**: (Recomendado) Para levantar todo el sistema con un solo comando. [Descargar Docker](https://www.docker.com/)
-* **Node.js (v18 o superior)** y **pnpm**: Requerido si deseas ejecutar el Frontend localmente. [Descargar Node.js](https://nodejs.org/) (pnpm se instala con `npm install -g pnpm`).
-* **Python (v3.11 o superior)**: Requerido si deseas ejecutar el Backend localmente sin Docker. [Descargar Python](https://www.python.org/)
+- **Git**: Para clonar el repositorio. [Descargar Git](https://git-scm.com/)
+- **Docker y Docker Compose**: (Recomendado) Para levantar todo el sistema con un solo comando. [Descargar Docker](https://www.docker.com/)
+- **Node.js (v18 o superior)** y **pnpm**: Requerido si deseas ejecutar el Frontend localmente. [Descargar Node.js](https://nodejs.org/) (pnpm se instala con `npm install -g pnpm`).
+- **Python (v3.11 o superior)**: Requerido si deseas ejecutar el Backend localmente sin Docker. [Descargar Python](https://www.python.org/)
 
 ---
 
@@ -31,25 +31,50 @@ cd ProyectoWeb
 Este método levantará automáticamente la base de datos PostgreSQL, el servidor Backend en Django y la interfaz Frontend en Next.js.
 
 ### 1. Configurar las Variables de Entorno
+
 Copia el archivo de plantilla a un archivo `.env` real dentro de la carpeta del backend.
+
 ```bash
 # Desde la raíz del proyecto
 cp Page/backend/.env.template Page/backend/.env
+# Si no existe .env.template, simplemente crea el archivo .env manualmente
 ```
-*(El archivo `.env` resultante está protegido y no se subirá a Git, ya que está configurado en `.gitignore`)*.
+
+**Ejemplo de archivo `.env` (Backend / Docker):**
+Crea un archivo llamado `.env` en la carpeta `Page/backend/` (o copia el template) con el siguiente contenido:
+
+```env
+# Ejemplo de configuración para el entorno
+POSTGRES_DB=bazar_db
+POSTGRES_USER=bazar_admin
+POSTGRES_PASSWORD=bazar_password
+DB_HOST=db
+DB_PORT=5432
+
+# Configuraciones de Django
+SECRET_KEY=clave_secreta_super_segura_para_desarrollo
+DEBUG=True
+```
+
+_(El archivo `.env` resultante está protegido y no se subirá a Git, ya que está configurado en `.gitignore`)_.
 
 ### 2. Iniciar el Proyecto con Docker Compose
+
 Navega a la carpeta `Page` y levanta los contenedores:
+
 ```bash
 cd Page
 docker compose up --build
 ```
+
 Este comando construirá las imágenes necesarias para el Backend y Frontend, migrará la base de datos y expondrá los servicios en los siguientes puertos:
-* 🌐 **Frontend (Next.js)**: [http://localhost:3000](http://localhost:3000)
-* ⚙️ **Backend (Django)**: [http://localhost:8000](http://localhost:8000)
-* 🐘 **Base de Datos (Postgres)**: `localhost:5432`
+
+- 🌐 **Frontend (Next.js)**: [http://localhost:3000](http://localhost:3000)
+- ⚙️ **Backend (Django)**: [http://localhost:8000](http://localhost:8000)
+- 🐘 **Base de Datos (Postgres)**: `localhost:5432`
 
 Para detener el proyecto, presiona `Ctrl + C` o ejecuta:
+
 ```bash
 docker compose down
 ```
@@ -63,8 +88,9 @@ Si prefieres ejecutar cada servicio localmente en tu sistema operativo:
 ### 1. Configurar la Base de Datos (PostgreSQL)
 
 Tienes dos opciones para la base de datos:
-* **Opción D1:** Tener PostgreSQL instalado localmente y crear una base de datos llamada `bazar_db` con el usuario `bazar_admin` y contraseña `bazar_password`.
-* **Opción D2 (Recomendada):** Usar el Docker Compose ligero del backend para levantar únicamente la base de datos en un contenedor:
+
+- **Opción D1:** Tener PostgreSQL instalado localmente y crear una base de datos llamada `bazar_db` con el usuario `bazar_admin` y contraseña `bazar_password`.
+- **Opción D2 (Recomendada):** Usar el Docker Compose ligero del backend para levantar únicamente la base de datos en un contenedor:
   ```bash
   cd Page/backend
   docker compose up -d
@@ -83,15 +109,15 @@ Tienes dos opciones para la base de datos:
    python -m venv entorno
    ```
 3. Activa el entorno virtual:
-   * **En Linux/macOS:**
+   - **En Linux/macOS:**
      ```bash
      source entorno/bin/activate
      ```
-   * **En Windows (PowerShell):**
+   - **En Windows (PowerShell):**
      ```powershell
      .\entorno\Scripts\Activate.ps1
      ```
-   * **En Windows (CMD):**
+   - **En Windows (CMD):**
      ```cmd
      .\entorno\Scripts\activate.bat
      ```
@@ -102,8 +128,19 @@ Tienes dos opciones para la base de datos:
 5. Crea tu archivo de configuración local:
    ```bash
    cp .env.template .env
+   # Si no existe, crea un archivo llamado .env con el siguiente ejemplo
    ```
-   *(Abre el archivo `.env` y ajusta las credenciales si utilizaste credenciales personalizadas para tu base de datos).*
+   **Ejemplo de archivo `.env` local:**
+   ```env
+   POSTGRES_DB=bazar_db
+   POSTGRES_USER=bazar_admin
+   POSTGRES_PASSWORD=bazar_password
+   DB_HOST=127.0.0.1
+   DB_PORT=5432
+   SECRET_KEY=clave_secreta_super_segura_para_desarrollo
+   DEBUG=True
+   ```
+   _(Abre el archivo `.env` y ajusta las credenciales si utilizaste credenciales personalizadas para tu base de datos local)._
 6. Ejecuta las migraciones de la base de datos:
    ```bash
    cd B2B
@@ -146,5 +183,6 @@ Tienes dos opciones para la base de datos:
 ## 🔒 Seguridad en Repositorios Públicos
 
 Este proyecto ha sido configurado para ser 100% seguro de subir a repositorios públicos:
+
 1. **Ignorados de Git:** Los archivos `.env` (credenciales de base de datos y llaves secretas), carpetas `node_modules/`, carpetas de build `.next/` y entornos virtuales de Python (`entorno/`, `venv/`) están configurados en el archivo [Page/.gitignore](file:///home/bas/Documents/ProyectoWeb/Page/.gitignore) y [.gitignore](file:///home/bas/Documents/ProyectoWeb/.gitignore) global.
 2. **Settings Seguros:** Django está configurado para cargar dinámicamente el `SECRET_KEY` y el estado `DEBUG` desde las variables de entorno. Nunca escribas credenciales reales en [Page/backend/B2B/B2B/settings.py](file:///home/bas/Documents/ProyectoWeb/Page/backend/B2B/B2B/settings.py).
