@@ -1,0 +1,501 @@
+{% extends "base.html" %}
+
+{% block title %}Planes de Suscripción{% endblock %}
+{% block meta_description %}Elige tu plan en Bazar B2B y potencia tu negocio mayorista con herramientas exclusivas de distribución.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-fade-in">
+
+  <!-- ============================================================
+       CABECERA — ZONA EXCLUSIVA MAYORISTAS
+  ============================================================ -->
+  <div class="text-center mb-12">
+    <!-- Badge exclusivo -->
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-6 border"
+         style="background: linear-gradient(135deg, #FFC22F20, #FB431820); border-color: #FFC22F50; color: #d97706;">
+      <span class="w-2 h-2 rounded-full animate-pulse" style="background: #FFC22F;"></span>
+      🏭 Zona Exclusiva para Mayoristas — ISBEN Solution
+    </div>
+    <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">
+      Elige tu <span style="color: #FB4318;">Plan</span>
+      <span style="color: #FFC22F;">de Suscripción</span>
+    </h1>
+    <p class="text-lg text-slate-500 max-w-2xl mx-auto">
+      Publica tu catálogo, gestiona pedidos y llega a minoristas en todo el país.
+      Sin comisiones por venta — solo una cuota fija mensual.
+    </p>
+
+    <!-- Suscripción actual -->
+    {% if suscripcion_actual %}
+    <div class="inline-flex items-center gap-3 mt-6 px-5 py-3 rounded-2xl border bg-white shadow-sm">
+      <div class="w-3 h-3 rounded-full {% if suscripcion_actual.estado == 'ACTIVA' %}bg-emerald-500 animate-pulse{% else %}bg-red-400{% endif %}"></div>
+      <div class="text-left">
+        <p class="text-sm font-bold text-slate-800">
+          Plan actual:
+          <span style="color: #FB4318;">{{ suscripcion_actual.plan.nombre_plan }}</span>
+        </p>
+        <p class="text-xs text-slate-500">
+          {% if suscripcion_actual.estado == 'ACTIVA' %}
+            ✅ Activo hasta {{ suscripcion_actual.fecha_fin|date:"d/m/Y" }}
+          {% else %}
+            ❌ Vencido — Renueva para seguir publicando
+          {% endif %}
+        </p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+
+  <!-- ============================================================
+       CARDS DE PLANES
+  ============================================================ -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+    {% if planes %}
+      {% for plan in planes %}
+      <div class="relative bg-white rounded-3xl shadow-lg border transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl overflow-hidden
+                  {% if plan.destacado %}border-[#FB4318] ring-2 ring-[#FB4318]/30 scale-[1.02]{% else %}border-slate-200 hover:border-[#FB4318]/40{% endif %}"
+           id="card-plan-{{ plan.id }}">
+
+        <!-- Badge destacado -->
+        {% if plan.destacado %}
+        <div class="absolute top-0 left-0 right-0 py-2 text-center text-xs font-black text-white tracking-widest uppercase"
+             style="background: linear-gradient(135deg, #FB4318, #FFC22F);">
+          ⭐ Más Popular
+        </div>
+        {% endif %}
+
+        <div class="p-8 {% if plan.destacado %}pt-12{% endif %}">
+          <!-- Nombre del plan -->
+          <div class="mb-5">
+            <h2 class="text-2xl font-extrabold text-slate-900">{{ plan.nombre_plan }}</h2>
+            <p class="text-sm text-slate-500 mt-1">
+              Hasta {{ plan.limite_productos }} productos publicados en el catálogo
+            </p>
+          </div>
+
+          <!-- Precio -->
+          <div class="flex items-end gap-1 mb-6">
+            <span class="text-5xl font-black" style="color: {% if plan.destacado %}#FB4318{% else %}#1e293b{% endif %};">
+              ${{ plan.precio_mensual }}
+            </span>
+            <span class="text-slate-400 font-medium mb-2">/mes</span>
+          </div>
+
+          <!-- Features -->
+          <ul class="space-y-3 mb-8">
+            <li class="flex items-start gap-2.5 text-sm text-slate-600">
+              <span class="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs"
+                    style="background: #22c55e;">✓</span>
+              Portal de mayorista activo
+            </li>
+            <li class="flex items-start gap-2.5 text-sm text-slate-600">
+              <span class="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs"
+                    style="background: #22c55e;">✓</span>
+              Configuración de MOQ y lotes
+            </li>
+            <li class="flex items-start gap-2.5 text-sm text-slate-600">
+              <span class="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs"
+                    style="background: #22c55e;">✓</span>
+              Gestión de pedidos entrantes
+            </li>
+            <li class="flex items-start gap-2.5 text-sm text-slate-600">
+              <span class="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs"
+                    style="background: #22c55e;">✓</span>
+              <strong>{{ plan.limite_productos }} SKUs</strong>&nbsp;publicados simultáneamente
+            </li>
+            {% if plan.destacado %}
+            <li class="flex items-start gap-2.5 text-sm text-slate-600">
+              <span class="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs"
+                    style="background: #FFC22F; color: #1a0a00;">★</span>
+              Posicionamiento prioritario en catálogo
+            </li>
+            {% endif %}
+          </ul>
+
+          <!-- CTA: Seleccionar plan -->
+          <button type="button"
+                  class="seleccionar-plan w-full py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 hover:-translate-y-0.5"
+                  data-plan-id="{{ plan.id }}"
+                  data-plan-nombre="{{ plan.nombre_plan }}"
+                  data-plan-precio="{{ plan.precio_mensual }}"
+                  {% if plan.destacado %}
+                  style="background: linear-gradient(135deg, #FB4318, #e03b14); color: white; box-shadow: 0 8px 20px rgba(251,67,24,0.35);"
+                  {% else %}
+                  style="background: #f8fafc; color: #1e293b; border: 2px solid #e2e8f0;"
+                  {% endif %}>
+            {% if suscripcion_actual and suscripcion_actual.plan == plan %}
+              ✓ Plan Activo
+            {% else %}
+              Seleccionar Plan →
+            {% endif %}
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+
+    {% else %}
+      <!-- Fallback: sin planes en DB — Datos harcodeados del MVP -->
+      <!-- Plan Freemium -->
+      <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
+        <h2 class="text-2xl font-extrabold text-slate-900 mb-1">Freemium</h2>
+        <p class="text-sm text-slate-500 mb-5">Hasta 50 productos publicados</p>
+        <div class="flex items-end gap-1 mb-6">
+          <span class="text-5xl font-black text-slate-900">$0</span>
+          <span class="text-slate-400 mb-2">/mes</span>
+        </div>
+        <ul class="space-y-3 mb-8 text-sm text-slate-600">
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Portal de mayorista activo</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Hasta 50 SKUs</li>
+          <li class="flex items-center gap-2 text-slate-400"><span>✗</span> Sin configuración de lotes</li>
+        </ul>
+        <button type="button" class="seleccionar-plan w-full py-3.5 rounded-2xl font-bold text-sm border-2 border-slate-200 text-slate-700 hover:border-[#FB4318] hover:text-[#FB4318] transition-all"
+                data-plan-id="1" data-plan-nombre="Freemium" data-plan-precio="0.00">
+          Seleccionar →
+        </button>
+      </div>
+
+      <!-- Plan Básico (destacado) -->
+      <div class="relative bg-white rounded-3xl shadow-xl border-2 border-[#FB4318] ring-4 ring-[#FB4318]/10 p-8 scale-[1.02] hover:-translate-y-2 transition-all duration-300">
+        <div class="absolute top-0 inset-x-0 py-2 text-center text-xs font-black text-white tracking-widest rounded-t-3xl"
+             style="background: linear-gradient(135deg, #FB4318, #FFC22F);">⭐ Más Popular</div>
+        <div class="pt-6">
+          <h2 class="text-2xl font-extrabold text-slate-900 mb-1">Plan Básico</h2>
+          <p class="text-sm text-slate-500 mb-5">Hasta 150 productos publicados</p>
+          <div class="flex items-end gap-1 mb-6">
+            <span class="text-5xl font-black" style="color: #FB4318;">$39</span>
+            <span class="text-slate-400 mb-2">/mes</span>
+          </div>
+          <ul class="space-y-3 mb-8 text-sm text-slate-600">
+            <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Todo lo del Freemium</li>
+            <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Hasta 150 SKUs</li>
+            <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Reglas MOQ y Lotes</li>
+            <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Soporte por email</li>
+          </ul>
+          <button type="button" class="seleccionar-plan w-full py-3.5 rounded-2xl font-bold text-sm text-white transition-all hover:-translate-y-0.5"
+                  data-plan-id="2" data-plan-nombre="Plan Básico" data-plan-precio="39.00"
+                  style="background: linear-gradient(135deg, #FB4318, #e03b14); box-shadow: 0 8px 20px rgba(251,67,24,0.35);">
+            Seleccionar Plan →
+          </button>
+        </div>
+      </div>
+
+      <!-- Plan Pro -->
+      <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 hover:-translate-y-2 hover:shadow-xl transition-all duration-300">
+        <h2 class="text-2xl font-extrabold text-slate-900 mb-1">Plan Pro</h2>
+        <p class="text-sm text-slate-500 mb-5">Hasta 1,000 productos publicados</p>
+        <div class="flex items-end gap-1 mb-6">
+          <span class="text-5xl font-black text-slate-900">$99</span>
+          <span class="text-slate-400 mb-2">/mes</span>
+        </div>
+        <ul class="space-y-3 mb-8 text-sm text-slate-600">
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Todo lo del Básico</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Hasta 1,000 SKUs</li>
+          <li class="flex items-center gap-2"><span class="text-[#FFC22F]">★</span> Carga masiva CSV/Excel</li>
+          <li class="flex items-center gap-2"><span class="text-[#FFC22F]">★</span> Reportes de ventas</li>
+        </ul>
+        <button type="button" class="seleccionar-plan w-full py-3.5 rounded-2xl font-bold text-sm border-2 border-slate-200 text-slate-700 hover:border-[#FB4318] hover:text-[#FB4318] transition-all"
+                data-plan-id="3" data-plan-nombre="Plan Pro" data-plan-precio="99.00">
+          Seleccionar →
+        </button>
+      </div>
+    {% endif %}
+  </div>
+
+
+  <!-- ============================================================
+       SECCIÓN DE PAGO (visible tras seleccionar un plan)
+  ============================================================ -->
+  <div id="seccion-pago" class="hidden animate-slide-up">
+    <div class="max-w-4xl mx-auto">
+      <!-- Separador -->
+      <div class="flex items-center gap-4 mb-10">
+        <hr class="flex-1 border-slate-200" />
+        <h2 class="text-2xl font-extrabold text-slate-900 whitespace-nowrap">
+          💳 Método de Pago
+        </h2>
+        <hr class="flex-1 border-slate-200" />
+      </div>
+
+      <!-- Plan seleccionado (resumen) -->
+      <div id="resumen-plan"
+           class="p-5 rounded-2xl border-2 flex items-center justify-between mb-8 bg-white shadow-sm"
+           style="border-color: #FB4318;">
+        <div>
+          <p class="text-sm text-slate-500 font-medium">Plan seleccionado</p>
+          <p id="nombre-plan-seleccionado" class="text-xl font-extrabold" style="color: #FB4318;"></p>
+        </div>
+        <div class="text-right">
+          <p class="text-sm text-slate-500 font-medium">Costo mensual</p>
+          <p id="precio-plan-seleccionado" class="text-2xl font-black text-slate-900"></p>
+        </div>
+      </div>
+
+      <!-- Opciones de método de pago -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+        <button type="button"
+                class="metodo-pago-btn p-4 rounded-2xl border-2 text-left transition-all duration-200 hover:border-[#FB4318]"
+                style="border-color: #e2e8f0;"
+                data-metodo="transferencia">
+          <div class="text-2xl mb-1">🏦</div>
+          <p class="font-bold text-slate-800 text-sm">Transferencia Bancaria</p>
+          <p class="text-xs text-slate-500 mt-0.5">QR + datos de cuenta</p>
+        </button>
+        <button type="button"
+                class="metodo-pago-btn p-4 rounded-2xl border-2 text-left transition-all duration-200 hover:border-[#FB4318]"
+                style="border-color: #e2e8f0;"
+                data-metodo="tarjeta">
+          <div class="text-2xl mb-1">💳</div>
+          <p class="font-bold text-slate-800 text-sm">Tarjeta de Crédito</p>
+          <p class="text-xs text-slate-500 mt-0.5">Próximamente</p>
+        </button>
+        <button type="button"
+                class="metodo-pago-btn p-4 rounded-2xl border-2 text-left transition-all duration-200 hover:border-[#FB4318]"
+                style="border-color: #e2e8f0;"
+                data-metodo="efectivo">
+          <div class="text-2xl mb-1">💵</div>
+          <p class="font-bold text-slate-800 text-sm">Pago en Efectivo</p>
+          <p class="text-xs text-slate-500 mt-0.5">Coordinar con agente</p>
+        </button>
+      </div>
+
+      <!-- ── BLOQUE TRANSFERENCIA BANCARIA ──────────────────────── -->
+      <div id="bloque-transferencia" class="hidden animate-fade-in">
+        <div class="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden">
+
+          <!-- Header del bloque -->
+          <div class="px-7 py-5 border-b border-slate-100"
+               style="background: linear-gradient(135deg, #1a0a00, #3d1200);">
+            <h3 class="text-lg font-extrabold text-white flex items-center gap-3">
+              <span class="w-8 h-8 rounded-xl bg-[#FB4318] flex items-center justify-center">🏦</span>
+              Transferencia Bancaria — Datos de Pago
+            </h3>
+            <p class="text-white/60 text-sm mt-1">Escanea el QR o transfiere manualmente usando los datos a continuación.</p>
+          </div>
+
+          <div class="p-7">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+              <!-- QR Banco de Loja -->
+              <div class="text-center">
+                <div class="inline-block p-4 bg-white rounded-2xl shadow-lg border-2 border-slate-100 mb-4">
+                  <img src="/media/brand/qr_banco_loja.jpg"
+                       alt="QR Banco de Loja"
+                       class="w-44 h-44 object-contain rounded-xl"
+                       onerror="this.src='/media/brand/qr_banco_loja.jpg'; this.onerror=null;" />
+                </div>
+                <!-- Datos bancarios Banco de Loja -->
+                <div class="bg-slate-50 rounded-2xl p-4 text-left border border-slate-200">
+                  <div class="flex items-center gap-2 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-[#004B87] flex items-center justify-center">
+                      <span class="text-white font-black text-xs">BL</span>
+                    </div>
+                    <p class="font-extrabold text-slate-900 text-sm">Banco de Loja</p>
+                  </div>
+                  <div class="space-y-2 text-sm">
+                    <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+                      <span class="text-slate-500 font-medium">Tipo de cuenta</span>
+                      <span class="font-bold text-slate-800">Cuenta Corriente</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+                      <span class="text-slate-500 font-medium">Titular</span>
+                      <span class="font-bold text-slate-800">Bazar B2B</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5">
+                      <span class="text-slate-500 font-medium">N° de cuenta</span>
+                      <button onclick="copiarTexto('290192348', this)"
+                              class="flex items-center gap-1.5 font-black text-[#FB4318] hover:text-[#e03b14] transition-colors">
+                        <span>290192348</span>
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- QR Banco Pichincha -->
+              <div class="text-center">
+                <div class="inline-block p-4 bg-white rounded-2xl shadow-lg border-2 border-slate-100 mb-4">
+                  <img src="/media/brand/qr_banco_pichincha.jpg"
+                       alt="QR Banco Pichincha"
+                       class="w-44 h-44 object-contain rounded-xl" />
+                </div>
+                <!-- Datos bancarios Banco Pichincha -->
+                <div class="bg-slate-50 rounded-2xl p-4 text-left border border-slate-200">
+                  <div class="flex items-center gap-2 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-[#f5a623] flex items-center justify-center">
+                      <span class="text-white font-black text-xs">BP</span>
+                    </div>
+                    <p class="font-extrabold text-slate-900 text-sm">Banco Pichincha</p>
+                  </div>
+                  <div class="space-y-2 text-sm">
+                    <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+                      <span class="text-slate-500 font-medium">Tipo de cuenta</span>
+                      <span class="font-bold text-slate-800">Cuenta de Ahorros</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+                      <span class="text-slate-500 font-medium">Titular</span>
+                      <span class="font-bold text-slate-800">Bazar B2B</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5">
+                      <span class="text-slate-500 font-medium">N° de cuenta</span>
+                      <button onclick="copiarTexto('220019233', this)"
+                              class="flex items-center gap-1.5 font-black text-[#FB4318] hover:text-[#e03b14] transition-colors">
+                        <span>220019233</span>
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Instrucciones de pago -->
+            <div class="mt-7 p-5 rounded-2xl border border-amber-200 bg-amber-50">
+              <h4 class="font-bold text-amber-800 mb-2 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Instrucciones de transferencia
+              </h4>
+              <ol class="text-sm text-amber-700 space-y-1.5 list-decimal list-inside">
+                <li>Transfiere el monto del plan elegido a cualquiera de las cuentas indicadas.</li>
+                <li>Usa como concepto: tu nombre de usuario y el nombre del plan (Ej: "<strong>{{ user.username }} — Plan Básico</strong>").</li>
+                <li>Haz clic en "Simular Pago y Activar Suscripción" para activar inmediatamente (MVP).</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BLOQUE TARJETA / EFECTIVO (próximamente) ─────────── -->
+      <div id="bloque-tarjeta" class="hidden animate-fade-in">
+        <div class="text-center py-12 bg-white rounded-2xl border border-slate-200">
+          <span class="text-5xl mb-4 block">🚧</span>
+          <h3 class="text-xl font-bold text-slate-700 mb-2">Próximamente</h3>
+          <p class="text-slate-400">Pago con tarjeta estará disponible en la siguiente versión de Bazar B2B.</p>
+        </div>
+      </div>
+
+      <!-- ── FORMULARIO POST: SIMULAR PAGO ─────────────────────── -->
+      <form id="form-activar-plan"
+            method="post"
+            action="{% url 'activar_suscripcion' %}"
+            class="mt-8 hidden">
+        {% csrf_token %}
+        <input type="hidden" name="plan_id" id="input-plan-id" />
+        <input type="hidden" name="metodo_pago" id="input-metodo-pago" value="transferencia" />
+
+        <button type="submit"
+                id="btn-simular-pago"
+                class="w-full flex items-center justify-center gap-3 py-5 px-8 rounded-3xl text-white font-black text-lg shadow-2xl hover:-translate-y-1 transition-all duration-200"
+                style="background: linear-gradient(135deg, #FB4318 0%, #FFC22F 100%);">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Simular Pago y Activar Suscripción
+        </button>
+
+        <p class="text-center text-xs text-slate-400 mt-3">
+          🔒 Simulación segura del MVP — En producción se conectará a Stripe o PayPal.
+        </p>
+      </form>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // ── Estado de la UI ────────────────────────────────────────────────────
+  let planActual = null;
+  let metodoActual = null;
+
+  // ── Seleccionar Plan ──────────────────────────────────────────────────
+  document.querySelectorAll('.seleccionar-plan').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      planActual = {
+        id:     this.dataset.planId,
+        nombre: this.dataset.planNombre,
+        precio: this.dataset.planPrecio,
+      };
+
+      // Actualizar UI del resumen
+      document.getElementById('nombre-plan-seleccionado').textContent = planActual.nombre;
+      document.getElementById('precio-plan-seleccionado').textContent = '$' + planActual.precio + ' /mes';
+      document.getElementById('input-plan-id').value = planActual.id;
+
+      // Hacer scroll y mostrar sección de pago
+      const seccion = document.getElementById('seccion-pago');
+      seccion.classList.remove('hidden');
+      seccion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // Highlight de la card seleccionada
+      document.querySelectorAll('[id^="card-plan-"]').forEach(c => c.style.boxShadow = '');
+      const card = document.getElementById('card-plan-' + planActual.id);
+      if (card) card.style.boxShadow = '0 0 0 3px #FB4318';
+    });
+  });
+
+  // ── Seleccionar Método de Pago ─────────────────────────────────────────
+  document.querySelectorAll('.metodo-pago-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      metodoActual = this.dataset.metodo;
+      document.getElementById('input-metodo-pago').value = metodoActual;
+
+      // Reset estilos de botones
+      document.querySelectorAll('.metodo-pago-btn').forEach(function (b) {
+        b.style.borderColor = '#e2e8f0';
+        b.style.background  = 'white';
+      });
+      // Activar el seleccionado
+      this.style.borderColor = '#FB4318';
+      this.style.background  = '#fff3ef';
+
+      // Mostrar/ocultar bloques
+      document.getElementById('bloque-transferencia').classList.add('hidden');
+      document.getElementById('bloque-tarjeta').classList.add('hidden');
+      document.getElementById('form-activar-plan').classList.add('hidden');
+
+      if (metodoActual === 'transferencia') {
+        document.getElementById('bloque-transferencia').classList.remove('hidden');
+        document.getElementById('form-activar-plan').classList.remove('hidden');
+      } else {
+        document.getElementById('bloque-tarjeta').classList.remove('hidden');
+      }
+    });
+  });
+
+  // ── Copiar número de cuenta ────────────────────────────────────────────
+  function copiarTexto(texto, btn) {
+    navigator.clipboard.writeText(texto).then(function () {
+      const original = btn.innerHTML;
+      btn.innerHTML = '<span class="text-emerald-600 font-bold text-sm">✓ Copiado</span>';
+      setTimeout(() => btn.innerHTML = original, 2000);
+    });
+  }
+
+  // ── Indicador de carga al confirmar pago ──────────────────────────────
+  document.getElementById('form-activar-plan')?.addEventListener('submit', function () {
+    if (!planActual) return;
+    const btn = document.getElementById('btn-simular-pago');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `
+        <svg class="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+        Procesando tu suscripción...
+      `;
+    }
+  });
+</script>
+{% endblock %}

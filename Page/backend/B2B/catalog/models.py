@@ -87,7 +87,8 @@ class Producto(models.Model):
     def clean(self):
         super().clean()
         # Esta validación solo corre cuando se está CREANDO un nuevo producto (no cuando se edita)
-        if not self.pk:
+        # y cuando el proveedor ya ha sido asignado al objeto (evita fallo en validación de ModelForms)
+        if not self.pk and getattr(self, 'proveedor_id', None):
             # 1. Verificamos si el proveedor tiene suscripción
             if not hasattr(self.proveedor, 'suscripcion_activa'):
                 raise ValidationError("Este proveedor no tiene una suscripción asignada.")

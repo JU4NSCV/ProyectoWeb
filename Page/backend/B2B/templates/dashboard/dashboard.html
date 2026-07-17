@@ -1,0 +1,736 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Logístico{% endblock %}
+{% block meta_description %}Panel de control de compras y ventas B2B — Bazar B2B ISBEN Solution. Gestiona tus pedidos y ventas en tiempo real.{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ── Pestañas activas ─────────────────────────────── */
+  .tab-btn { transition: all 0.2s ease; }
+  .tab-btn.active {
+    background: linear-gradient(135deg, #FB4318, #e03b14);
+    color: white;
+    box-shadow: 0 4px 15px rgba(251,67,24,0.35);
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Desplegable de productos en fila ─────────────── */
+  .productos-collapse { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+  .productos-collapse.open { max-height: 500px; }
+
+  /* ── Badge de estado ──────────────────────────────── */
+  .estado-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── Select de estado en formulario ──────────────── */
+  .estado-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 14px;
+    padding-right: 30px;
+  }
+
+  /* ── Animación filas de tabla ─────────────────────── */
+  tbody tr { animation: fadeInRow 0.3s ease both; }
+  @keyframes fadeInRow {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  tbody tr:nth-child(2) { animation-delay: 0.05s; }
+  tbody tr:nth-child(3) { animation-delay: 0.10s; }
+  tbody tr:nth-child(4) { animation-delay: 0.15s; }
+  tbody tr:nth-child(5) { animation-delay: 0.20s; }
+
+  /* ── KPI card gradient borders ────────────────────── */
+  .kpi-card { position: relative; }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 1rem;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(251,67,24,0.2), transparent);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in">
+
+  <!-- ================================================================
+     CABECERA DEL DASHBOARD
+  ================================================================ -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
+        ¡Hola, <span style="color:#FB4318;">{{ user.first_name|default:user.username }}</span>! 👋
+      </h1>
+      <p class="mt-1.5 text-slate-500 text-sm">
+        Dashboard Logístico —
+        {% if user.rol == 'MAYORISTA' %}
+          <span class="font-semibold" style="color:#FB4318;">🏭 Mayorista / Proveedor</span>
+        {% elif user.rol == 'MINORISTA' %}
+          <span class="font-semibold text-emerald-600">🏪 Tienda Minorista B2B</span>
+        {% elif user.rol == 'CONSUMIDOR' %}
+          <span class="font-semibold text-blue-600">👤 Consumidor Final</span>
+        {% elif user.is_superuser %}
+          <span class="font-semibold text-red-600">⚡ Super Administrador</span>
+        {% else %}
+          <span class="font-semibold text-slate-600">{{ user.get_rol_display }}</span>
+        {% endif %}
+        {% if user.empresa_verificada %}
+          <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold">✓ Verificada</span>
+        {% elif user.rol in "MINORISTA,MAYORISTA" %}
+          <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs font-semibold">⏳ Pendiente verificación</span>
+        {% endif %}
+      </p>
+    </div>
+    <a href="{% url 'catalogo' %}"
+       class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold btn-brand shadow-lg shadow-[#FB4318]/20">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+      </svg>
+      Ir al Catálogo
+    </a>
+  </div>
+
+  <!-- ================================================================
+     TARJETAS KPI
+  ================================================================ -->
+  <div class="grid grid-cols-2 {% if user.rol == 'MAYORISTA' or user.is_superuser %}lg:grid-cols-4{% else %}lg:grid-cols-3{% endif %} gap-4 mb-8">
+
+    <!-- KPI: Mis Compras -->
+    <div class="kpi-card bg-white rounded-2xl shadow-sm border border-slate-100 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all group">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Mis Compras</span>
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform" style="background:rgba(251,67,24,0.1);">
+          <svg class="w-5 h-5" style="color:#FB4318;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          </svg>
+        </div>
+      </div>
+      <p class="text-3xl font-extrabold text-slate-900">{{ mis_compras.count|default:"0" }}</p>
+      <p class="text-xs text-slate-400 mt-1">órdenes realizadas</p>
+    </div>
+
+    <!-- KPI: Pendientes de Compra -->
+    <div class="kpi-card bg-white rounded-2xl shadow-sm border border-slate-100 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all group">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">En Curso</span>
+        <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      </div>
+      <p class="text-3xl font-extrabold text-amber-600">{{ compras_pendientes|default:"0" }}</p>
+      <p class="text-xs text-slate-400 mt-1">pendientes / en proceso</p>
+    </div>
+
+    <!-- KPI: Entregados -->
+    <div class="kpi-card bg-white rounded-2xl shadow-sm border border-slate-100 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all group">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Completados</span>
+        <div class="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      </div>
+      <p class="text-3xl font-extrabold text-emerald-600">{{ compras_entregadas|default:"0" }}</p>
+      <p class="text-xs text-slate-400 mt-1">pedidos entregados</p>
+    </div>
+
+    <!-- KPI: Ventas (solo Mayorista) -->
+    {% if user.rol == 'MAYORISTA' or user.is_superuser %}
+    <div class="kpi-card bg-white rounded-2xl shadow-sm border border-slate-100 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all group">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Mis Ventas</span>
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform" style="background:rgba(255,194,47,0.15);">
+          <svg class="w-5 h-5" style="color:#d97706;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        </div>
+      </div>
+      <p class="text-3xl font-extrabold" style="color:#d97706;">{{ total_ventas|default:"0" }}</p>
+      <p class="text-xs text-slate-400 mt-1">
+        órdenes recibidas
+        {% if ventas_pendientes_count %}
+          <span class="ml-1 px-1.5 py-0.5 rounded-full text-white text-[10px] font-bold" style="background:#FB4318;">{{ ventas_pendientes_count }} activas</span>
+        {% endif %}
+      </p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ================================================================
+     SISTEMA DE PESTAÑAS (Tabs)
+     — Tab 1: Mis Compras (todos los roles)
+     — Tab 2: Ventas a Despachar (solo Mayoristas)
+  ================================================================ -->
+
+  <!-- Nav de pestañas -->
+  <div class="flex gap-2 mb-6 p-1.5 bg-slate-100 rounded-2xl w-fit">
+    <button id="tab-compras-btn"
+            class="tab-btn active px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 flex items-center gap-2"
+            onclick="switchTab('compras')">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+      </svg>
+      Mis Compras
+      {% if mis_compras.count %}
+        <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-white/30 text-current">{{ mis_compras.count }}</span>
+      {% endif %}
+    </button>
+
+    {% if user.rol == 'MAYORISTA' or user.is_superuser %}
+    <button id="tab-ventas-btn"
+            class="tab-btn px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 flex items-center gap-2"
+            onclick="switchTab('ventas')">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+      </svg>
+      Ventas a Despachar
+      {% if ventas_pendientes_count %}
+        <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-white/30 text-current">{{ ventas_pendientes_count }}</span>
+      {% endif %}
+    </button>
+    {% endif %}
+  </div>
+
+  <!-- ================================================================
+     TAB 1: MIS COMPRAS
+  ================================================================ -->
+  <div id="tab-compras" class="tab-panel active animate-slide-up">
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm" style="background:linear-gradient(135deg,#FB4318,#e03b14);">📋</span>
+            Historial de Mis Compras
+          </h2>
+          <p class="text-sm text-slate-400 mt-0.5 ml-10">Todas las órdenes que has realizado en la plataforma</p>
+        </div>
+        <span class="px-3 py-1.5 rounded-xl text-xs font-bold border" style="color:#FB4318;border-color:rgba(251,67,24,0.3);background:rgba(251,67,24,0.05);">
+          {{ mis_compras.count }} orden(es)
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        {% if mis_compras %}
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider">
+              <th class="px-6 py-3 text-left font-semibold">Pedido</th>
+              <th class="px-6 py-3 text-left font-semibold">Fecha</th>
+              <th class="px-6 py-3 text-left font-semibold">Proveedor(es)</th>
+              <th class="px-6 py-3 text-left font-semibold">Productos</th>
+              <th class="px-6 py-3 text-left font-semibold">Total</th>
+              <th class="px-6 py-3 text-left font-semibold">Estado</th>
+              <th class="px-6 py-3 text-left font-semibold">Dirección</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50">
+            {% for pedido in mis_compras %}
+            <tr class="hover:bg-slate-50/80 transition-colors">
+              <!-- ID -->
+              <td class="px-6 py-4">
+                <span class="font-extrabold text-lg" style="color:#FB4318;">#{{ pedido.id }}</span>
+              </td>
+
+              <!-- Fecha -->
+              <td class="px-6 py-4 text-slate-500 text-xs whitespace-nowrap">
+                <p class="font-medium text-slate-700">{{ pedido.fecha_pedido|date:"d/m/Y" }}</p>
+                <p class="text-slate-400">{{ pedido.fecha_pedido|date:"H:i" }}</p>
+              </td>
+
+              <!-- Proveedor(es) únicos -->
+              <td class="px-6 py-4">
+                <div class="flex flex-col gap-0.5">
+                  {% for detalle in pedido.detalles.all %}
+                    {% if forloop.first or detalle.producto.proveedor != pedido.detalles.all|first %}
+                    <span class="text-xs font-medium text-slate-600">
+                      🏭 {{ detalle.producto.proveedor.razon_social|default:detalle.producto.proveedor.username }}
+                    </span>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </td>
+
+              <!-- Productos -->
+              <td class="px-6 py-4">
+                <div class="space-y-0.5">
+                  {% for detalle in pedido.detalles.all %}
+                  <p class="text-xs text-slate-600">
+                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-md text-white text-[10px] font-bold mr-1"
+                          style="background:rgba(251,67,24,0.7);">{{ detalle.cantidad }}</span>
+                    <span class="font-medium">{{ detalle.producto.nombre }}</span>
+                    <span class="text-slate-400 ml-1">(×${{ detalle.precio_unitario_guardado }})</span>
+                  </p>
+                  {% endfor %}
+                </div>
+              </td>
+
+              <!-- Total -->
+              <td class="px-6 py-4">
+                <span class="font-extrabold text-slate-900 text-base">${{ pedido.total }}</span>
+              </td>
+
+              <!-- Estado -->
+              <td class="px-6 py-4">
+                <span class="estado-badge
+                  {% if pedido.estado == 'PENDIENTE' %}bg-amber-100 text-amber-700
+                  {% elif pedido.estado == 'APROBADO' %}bg-blue-100 text-blue-700
+                  {% elif pedido.estado == 'DESPACHADO' %}bg-purple-100 text-purple-700
+                  {% elif pedido.estado == 'ENTREGADO' %}bg-emerald-100 text-emerald-700
+                  {% else %}bg-red-100 text-red-700{% endif %}">
+                  {% if pedido.estado == 'PENDIENTE' %}⏳
+                  {% elif pedido.estado == 'APROBADO' %}🔵
+                  {% elif pedido.estado == 'DESPACHADO' %}🚚
+                  {% elif pedido.estado == 'ENTREGADO' %}✅
+                  {% else %}❌{% endif %}
+                  {{ pedido.get_estado_display }}
+                </span>
+              </td>
+
+              <!-- Dirección -->
+              <td class="px-6 py-4 text-slate-500 text-xs max-w-[180px]">
+                <p class="truncate" title="{{ pedido.direccion_entrega_final }}">{{ pedido.direccion_entrega_final }}</p>
+                {% if pedido.notas_pedido %}
+                <p class="text-slate-400 mt-0.5 truncate italic" title="{{ pedido.notas_pedido }}">💬 {{ pedido.notas_pedido }}</p>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% else %}
+        <!-- Estado vacío -->
+        <div class="text-center py-20 text-slate-400">
+          <div class="w-20 h-20 mx-auto mb-5 rounded-2xl flex items-center justify-center" style="background:rgba(251,67,24,0.07);">
+            <svg class="w-10 h-10" style="color:rgba(251,67,24,0.4);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-slate-600 mb-1">Aún no has realizado pedidos</h3>
+          <p class="text-sm mb-6">Explora el catálogo y realiza tu primera compra B2B.</p>
+          <a href="{% url 'catalogo' %}"
+             class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-sm btn-brand">
+            🏪 Explorar Catálogo
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+
+  <!-- ================================================================
+     TAB 2: VENTAS A DESPACHAR (Solo Mayoristas)
+  ================================================================ -->
+  {% if user.rol == 'MAYORISTA' or user.is_superuser %}
+  <div id="tab-ventas" class="tab-panel animate-slide-up">
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm" style="background:linear-gradient(135deg,#FFC22F,#f59e0b);">🚚</span>
+            Ventas a Despachar
+          </h2>
+          <p class="text-sm text-slate-400 mt-0.5 ml-10">Gestiona y actualiza el estado de los pedidos de tus clientes</p>
+        </div>
+        <div class="flex items-center gap-3">
+          {% if ventas_pendientes_count %}
+          <span class="px-3 py-1.5 rounded-xl text-xs font-bold text-white" style="background:linear-gradient(135deg,#FB4318,#e03b14);">
+            🔔 {{ ventas_pendientes_count }} activas
+          </span>
+          {% endif %}
+          <span class="px-3 py-1.5 rounded-xl text-xs font-bold border border-slate-200 text-slate-500">
+            {{ total_ventas }} total
+          </span>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        {% if mis_ventas %}
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider">
+              <th class="px-4 py-3 text-left font-semibold">Pedido</th>
+              <th class="px-4 py-3 text-left font-semibold">Fecha</th>
+              <th class="px-4 py-3 text-left font-semibold">Cliente</th>
+              <th class="px-4 py-3 text-left font-semibold">Total</th>
+              <th class="px-4 py-3 text-left font-semibold">Productos a Empacar</th>
+              <th class="px-4 py-3 text-left font-semibold">Estado Actual</th>
+              <th class="px-4 py-3 text-left font-semibold">Actualizar Estado</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50">
+            {% for venta in mis_ventas %}
+            <tr class="hover:bg-amber-50/30 transition-colors group">
+
+              <!-- ID Pedido -->
+              <td class="px-4 py-4">
+                <span class="font-extrabold text-lg" style="color:#FB4318;">#{{ venta.id }}</span>
+              </td>
+
+              <!-- Fecha -->
+              <td class="px-4 py-4 text-xs whitespace-nowrap">
+                <p class="font-medium text-slate-700">{{ venta.fecha_pedido|date:"d/m/Y" }}</p>
+                <p class="text-slate-400">{{ venta.fecha_pedido|date:"H:i" }}</p>
+              </td>
+
+              <!-- Cliente -->
+              <td class="px-4 py-4">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                       style="background:linear-gradient(135deg,#FB4318,#e03b14);">
+                    {{ venta.cliente.username|first|upper }}
+                  </div>
+                  <div>
+                    <p class="font-semibold text-slate-800 leading-none">
+                      {{ venta.cliente.razon_social|default:venta.cliente.get_full_name|default:venta.cliente.username }}
+                    </p>
+                    <p class="text-xs text-slate-400 leading-none mt-0.5">{{ venta.cliente.email }}</p>
+                    {% if venta.cliente.rol %}
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">{{ venta.cliente.get_rol_display }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+
+              <!-- Total -->
+              <td class="px-4 py-4">
+                <span class="font-extrabold text-slate-900 text-base">${{ venta.total }}</span>
+              </td>
+
+              <!-- Productos a empacar (desplegable) -->
+              <td class="px-4 py-4">
+                <button type="button"
+                        id="toggle-{{ venta.id }}"
+                        onclick="toggleProductos('{{ venta.id }}')"
+                        class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors"
+                        style="color:#FB4318;border-color:rgba(251,67,24,0.3);background:rgba(251,67,24,0.05);">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                  Ver {{ venta.detalles.count }} producto(s)
+                  <svg id="chevron-{{ venta.id }}" class="w-3.5 h-3.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                <!-- Subpanel de productos -->
+                <div id="productos-{{ venta.id }}" class="productos-collapse mt-2 bg-slate-50 rounded-xl overflow-hidden">
+                  <div class="p-3 space-y-2">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">📦 Lista de empaque</p>
+                    {% for detalle in venta.detalles.all %}
+                    <div class="flex items-center gap-2 text-xs text-slate-700">
+                      <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
+                            style="background:linear-gradient(135deg,#FB4318,#e03b14);">
+                        {{ detalle.cantidad }}
+                      </span>
+                      <div class="flex-1 min-w-0">
+                        <span class="font-semibold block truncate">{{ detalle.producto.nombre }}</span>
+                        <span class="text-slate-400">SKU: {{ detalle.producto.sku|default:"—" }} · ${{ detalle.precio_unitario_guardado }} c/u</span>
+                      </div>
+                      <span class="font-bold text-slate-900 text-right">${{ detalle.subtotal }}</span>
+                    </div>
+                    {% endfor %}
+                    <div class="pt-2 border-t border-slate-200 flex justify-between text-xs">
+                      <span class="text-slate-400">Dirección:</span>
+                      <span class="font-medium text-slate-700 text-right max-w-[160px] truncate" title="{{ venta.direccion_entrega_final }}">
+                        {{ venta.direccion_entrega_final }}
+                      </span>
+                    </div>
+                    {% if venta.notas_pedido %}
+                    <div class="text-xs text-slate-400 italic">💬 {{ venta.notas_pedido }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+
+              <!-- Estado actual -->
+              <td class="px-4 py-4">
+                <span class="estado-badge
+                  {% if venta.estado == 'PENDIENTE' %}bg-amber-100 text-amber-700
+                  {% elif venta.estado == 'APROBADO' %}bg-blue-100 text-blue-700
+                  {% elif venta.estado == 'DESPACHADO' %}bg-purple-100 text-purple-700
+                  {% elif venta.estado == 'ENTREGADO' %}bg-emerald-100 text-emerald-700
+                  {% else %}bg-red-100 text-red-700{% endif %}">
+                  {% if venta.estado == 'PENDIENTE' %}⏳
+                  {% elif venta.estado == 'APROBADO' %}🔵
+                  {% elif venta.estado == 'DESPACHADO' %}🚚
+                  {% elif venta.estado == 'ENTREGADO' %}✅
+                  {% else %}❌{% endif %}
+                  {{ venta.get_estado_display }}
+                </span>
+              </td>
+
+              <!-- ──────────────────────────────────────────────────────────────
+                 FORMULARIO POST: Actualizar Estado del Pedido (CRÍTICO)
+                 - CSRF protegido
+                 - Pasa pedido_id y nuevo_estado al backend
+                 - El backend verifica que el Mayorista sea dueño del pedido
+              ────────────────────────────────────────────────────────────── -->
+              <td class="px-4 py-4">
+                {% if venta.estado != 'ENTREGADO' and venta.estado != 'CANCELADO' %}
+                <form method="POST"
+                      action="{% url 'actualizar_estado' %}"
+                      class="flex items-center gap-2"
+                      onsubmit="return confirmUpdate(this, '{{ venta.id }}')">
+                  {% csrf_token %}
+                  <!-- Campo oculto con el ID del pedido -->
+                  <input type="hidden" name="pedido_id" value="{{ venta.id }}" />
+
+                  <!-- Selector de nuevo estado -->
+                  <select name="nuevo_estado"
+                          id="estado-select-{{ venta.id }}"
+                          class="estado-select text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-700 font-medium focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                          style="--tw-ring-color:rgba(251,67,24,0.4);">
+                    {% for valor, etiqueta in estados_pedido %}
+                      {% if valor != 'CANCELADO' %}
+                      <option value="{{ valor }}"
+                              {% if valor == venta.estado %}selected{% endif %}>
+                        {% if valor == 'PENDIENTE' %}⏳{% elif valor == 'APROBADO' %}🔵{% elif valor == 'DESPACHADO' %}🚚{% elif valor == 'ENTREGADO' %}✅{% endif %}
+                        {{ etiqueta }}
+                      </option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+
+                  <!-- Botón Actualizar -->
+                  <button type="submit"
+                          id="btn-actualizar-{{ venta.id }}"
+                          class="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-white text-xs font-bold transition-all hover:shadow-md active:scale-95"
+                          style="background:linear-gradient(135deg,#FB4318,#e03b14);">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Actualizar
+                  </button>
+                </form>
+                {% else %}
+                <!-- Pedido cerrado: no se puede actualizar -->
+                <span class="text-xs text-slate-300 font-medium italic">
+                  {% if venta.estado == 'ENTREGADO' %}✅ Pedido cerrado{% else %}❌ Cancelado{% endif %}
+                </span>
+                {% endif %}
+              </td>
+
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% else %}
+        <!-- Estado vacío -->
+        <div class="text-center py-20 text-slate-400">
+          <div class="w-20 h-20 mx-auto mb-5 rounded-2xl flex items-center justify-center" style="background:rgba(255,194,47,0.12);">
+            <svg class="w-10 h-10" style="color:rgba(255,194,47,0.6);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold text-slate-600 mb-1">¡Todo al día!</h3>
+          <p class="text-sm">No tienes pedidos pendientes de despachar en este momento.</p>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- ── Resumen de productos publicados (solo Mayorista) ─────────────────── -->
+    {% if mis_productos %}
+    <section class="mt-6 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <span class="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs" style="background:linear-gradient(135deg,#FB4318,#e03b14);">📦</span>
+          Mis Productos en el Catálogo
+        </h2>
+        <span class="text-xs text-slate-400 font-medium">{{ total_productos }} publicado(s)</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider">
+              <th class="px-5 py-3 text-left font-semibold">Producto</th>
+              <th class="px-5 py-3 text-left font-semibold">SKU</th>
+              <th class="px-5 py-3 text-left font-semibold">Categoría</th>
+              <th class="px-5 py-3 text-left font-semibold">P. Público</th>
+              <th class="px-5 py-3 text-left font-semibold">P. B2B</th>
+              <th class="px-5 py-3 text-left font-semibold">Stock</th>
+              <th class="px-5 py-3 text-left font-semibold">MOQ / Lote</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50">
+            {% for p in mis_productos %}
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="px-5 py-3 font-semibold text-slate-800">{{ p.nombre }}</td>
+              <td class="px-5 py-3 text-slate-500 font-mono text-xs">{{ p.sku|default:"—" }}</td>
+              <td class="px-5 py-3">
+                <span class="px-2 py-0.5 rounded-md text-xs font-medium" style="background:rgba(251,67,24,0.08);color:#e03b14;">
+                  {{ p.categoria.nombre }}
+                </span>
+              </td>
+              <td class="px-5 py-3 text-slate-600">${{ p.precio_publico }}</td>
+              <td class="px-5 py-3 font-bold text-emerald-600">${{ p.precio_minorista }}</td>
+              <td class="px-5 py-3">
+                <span class="font-bold {% if p.stock_disponible < 10 %}text-red-500{% else %}text-slate-700{% endif %}">
+                  {{ p.stock_disponible }}
+                  {% if p.stock_disponible < 10 %}<span class="text-[10px] text-red-400">⚠ bajo</span>{% endif %}
+                </span>
+              </td>
+              <td class="px-5 py-3 text-slate-500 text-xs">
+                {% if p.moq > 1 %}<span class="text-amber-600 font-medium">MOQ:{{ p.moq }}</span>{% endif %}
+                {% if p.moq > 1 and p.multiplo_lote > 1 %} / {% endif %}
+                {% if p.multiplo_lote > 1 %}<span class="text-blue-600 font-medium">×{{ p.multiplo_lote }}</span>{% endif %}
+                {% if p.moq <= 1 and p.multiplo_lote <= 1 %}<span class="text-slate-300">—</span>{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- ================================================================
+     PANEL ADMIN: Empresas Pendientes de Verificación
+  ================================================================ -->
+  {% if user.is_superuser and empresas_pendientes %}
+  <section class="mt-8 bg-white rounded-2xl shadow-sm border border-red-100 overflow-hidden">
+    <div class="px-6 py-5 border-b border-red-100 flex items-center gap-3">
+      <span class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center text-xl">⚠️</span>
+      <div>
+        <h2 class="text-lg font-bold text-slate-900">Empresas Pendientes de Verificación</h2>
+        <p class="text-sm text-slate-500">{{ empresas_pendientes.count }} empresa(s) esperando aprobación</p>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-red-50 text-slate-400 text-xs uppercase tracking-wider">
+            <th class="px-6 py-3 text-left font-semibold">Usuario</th>
+            <th class="px-6 py-3 text-left font-semibold">Razón Social</th>
+            <th class="px-6 py-3 text-left font-semibold">RUC</th>
+            <th class="px-6 py-3 text-left font-semibold">Rol</th>
+            <th class="px-6 py-3 text-left font-semibold">Documento</th>
+            <th class="px-6 py-3 text-left font-semibold">Registrado</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50">
+          {% for empresa in empresas_pendientes %}
+          <tr class="hover:bg-red-50/30 transition-colors">
+            <td class="px-6 py-4">
+              <p class="font-semibold text-slate-800">{{ empresa.username }}</p>
+              <p class="text-xs text-slate-400">{{ empresa.email }}</p>
+            </td>
+            <td class="px-6 py-4 text-slate-700">{{ empresa.razon_social|default:"—" }}</td>
+            <td class="px-6 py-4 font-mono text-slate-600 text-xs">{{ empresa.ruc|default:"—" }}</td>
+            <td class="px-6 py-4">
+              <span class="px-2 py-0.5 rounded-md text-xs font-bold" style="background:rgba(251,67,24,0.08);color:#e03b14;">
+                {{ empresa.get_rol_display }}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              {% if empresa.documento_verificacion %}
+                <a href="{{ empresa.documento_verificacion.url }}" target="_blank"
+                   class="inline-flex items-center gap-1 text-xs font-medium transition-colors" style="color:#FB4318;">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Ver documento
+                </a>
+              {% else %}
+                <span class="text-xs text-slate-300">Sin documento</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-4 text-slate-400 text-xs">{{ empresa.date_joined|date:"d/m/Y" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="px-6 py-4 bg-slate-50 border-t border-slate-100">
+      <p class="text-xs text-slate-400">
+        💡 Para verificar una empresa, usa el
+        <a href="/admin/users/customuser/" class="font-medium hover:underline" style="color:#FB4318;">Panel de Administración</a>
+        o el API endpoint <code class="bg-slate-200 px-1 rounded">/api/admin/empresas/&lt;id&gt;/verificar_empresa/</code>
+      </p>
+    </div>
+  </section>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // ── Sistema de Tabs ────────────────────────────────────────────
+  function switchTab(tab) {
+    // Ocultar todos los paneles
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.classList.remove('active');
+    });
+    // Desactivar todos los botones
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.remove('active');
+    });
+    // Activar el panel y botón seleccionados
+    const panel = document.getElementById('tab-' + tab);
+    const btn   = document.getElementById('tab-' + tab + '-btn');
+    if (panel) panel.classList.add('active');
+    if (btn)   btn.classList.add('active');
+  }
+
+  // ── Desplegable de productos por pedido ───────────────────────
+  function toggleProductos(id) {
+    const panel   = document.getElementById('productos-' + id);
+    const chevron = document.getElementById('chevron-' + id);
+    if (!panel) return;
+
+    const isOpen = panel.classList.contains('open');
+    panel.classList.toggle('open', !isOpen);
+    if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+  }
+
+  // ── Confirmación antes de actualizar estado ───────────────────
+  function confirmUpdate(form, pedidoId) {
+    const select = form.querySelector('select[name="nuevo_estado"]');
+    const estado = select ? select.options[select.selectedIndex].text.trim() : '?';
+    return confirm(`¿Confirmas actualizar el Pedido #${pedidoId} a:\n"${estado}"?`);
+  }
+
+  // ── Highlight del tab si viene de redirect con mensaje ────────
+  document.addEventListener('DOMContentLoaded', function () {
+    // Si hay un mensaje de éxito relacionado a actualización, mostrar pestaña Ventas
+    const toasts = document.querySelectorAll('.message-toast');
+    toasts.forEach(function (toast) {
+      const text = toast.textContent || '';
+      if (text.includes('actualizado') || text.includes('Pedido #')) {
+        {% if user.rol == 'MAYORISTA' or user.is_superuser %}
+        switchTab('ventas');
+        {% endif %}
+      }
+    });
+  });
+</script>
+{% endblock %}

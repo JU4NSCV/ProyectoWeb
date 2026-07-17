@@ -1,0 +1,553 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Inventario{% endblock %}
+{% block meta_description %}Gestiona tu catálogo de productos en Bazar B2B. Publica, edita y controla tu inventario mayorista.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in">
+
+  <!-- ============================================================
+       CABECERA DEL INVENTARIO
+  ============================================================ -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div>
+      <div class="flex items-center gap-3 mb-1">
+        <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#FB4318]/30"
+             style="background: linear-gradient(135deg, #FB4318, #e03b14);">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Mi Inventario</h1>
+      </div>
+      <p class="text-slate-500">
+        🏭 <span class="font-semibold" style="color: #FB4318;">{{ user.razon_social|default:user.username }}</span>
+        — Gestiona y publica tus productos en el catálogo B2B.
+      </p>
+    </div>
+
+    <!-- Botón Nuevo Producto -->
+    <button id="btn-abrir-modal"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-white font-bold text-sm shadow-lg shadow-[#FB4318]/30 hover:-translate-y-0.5 transition-all duration-200"
+            style="background: linear-gradient(135deg, #FB4318, #e03b14);">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+      </svg>
+      Publicar Producto
+    </button>
+  </div>
+
+  <!-- ============================================================
+       KPIs: ESTADO DEL INVENTARIO Y SUSCRIPCIÓN
+  ============================================================ -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+
+    <!-- Total productos -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4 hover:shadow-md hover:border-[#FB4318]/20 transition-all group">
+      <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-md shadow-[#FB4318]/20 group-hover:scale-105 transition-transform"
+           style="background: linear-gradient(135deg, #FB4318, #e03b14);">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+      </div>
+      <div>
+        <p class="text-2xl font-black text-slate-900">{{ total_productos }}</p>
+        <p class="text-xs text-slate-500 font-medium">Productos publicados</p>
+      </div>
+    </div>
+
+    <!-- Plan actual -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-all group">
+      <div class="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform"
+           style="background: linear-gradient(135deg, #FFC22F, #f59e0b);">
+        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+        </svg>
+      </div>
+      <div>
+        {% if suscripcion %}
+        <p class="text-base font-black text-slate-900">{{ suscripcion.plan.nombre_plan }}</p>
+        <p class="text-xs text-slate-500 font-medium">{{ total_productos }}/{{ suscripcion.plan.limite_productos }} SKUs usados</p>
+        {% else %}
+        <p class="text-base font-black text-slate-900">Sin plan</p>
+        <p class="text-xs text-slate-500 font-medium"><a href="{% url 'suscripciones' %}" class="underline" style="color: #FB4318;">Ver planes disponibles →</a></p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Disponibilidad del plan (barra de progreso) -->
+    {% if suscripcion %}
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 hover:shadow-md transition-all">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Capacidad del Plan</p>
+      {% widthratio total_productos suscripcion.plan.limite_productos 100 as pct_uso %}
+      <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mb-2">
+        <div class="h-full rounded-full transition-all duration-500"
+             style="width: {{ pct_uso }}%;
+                    background: {% if pct_uso|add:'0' >= 80 %}#FB4318{% elif pct_uso|add:'0' >= 50 %}#FFC22F{% else %}#22c55e{% endif %};">
+        </div>
+      </div>
+      <p class="text-xs text-slate-400">
+        {{ pct_uso }}% usado —
+        {% if suscripcion.estado == 'ACTIVA' %}
+          <span class="text-emerald-600 font-semibold">✓ Activo hasta {{ suscripcion.fecha_fin|date:"d/m/Y" }}</span>
+        {% else %}
+          <span class="text-red-500 font-semibold">⚠ Plan vencido</span>
+        {% endif %}
+      </p>
+    </div>
+    {% else %}
+    <div class="bg-gradient-to-br from-[#FFC22F]/10 to-[#FB4318]/10 rounded-2xl border border-[#FFC22F]/30 p-5 flex items-center justify-center">
+      <a href="{% url 'suscripciones' %}"
+         class="text-sm font-bold px-4 py-2 rounded-xl text-white shadow-md transition-all hover:-translate-y-0.5"
+         style="background: linear-gradient(135deg, #FFC22F, #f59e0b); color: #1a0a00;">
+        ⭐ Activar Suscripción
+      </a>
+    </div>
+    {% endif %}
+
+  </div>
+
+  <!-- ============================================================
+       TABLA DE INVENTARIO
+  ============================================================ -->
+  <section class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+      <div>
+        <h2 class="text-lg font-bold text-slate-900">📋 Mis Productos Publicados</h2>
+        <p class="text-sm text-slate-500 mt-0.5">Inventario activo en el catálogo de Bazar B2B</p>
+      </div>
+      <!-- Badge de total -->
+      <span class="px-3 py-1 rounded-full text-xs font-bold text-white"
+            style="background: #FB4318;">
+        {{ total_productos }} producto{{ total_productos|pluralize:"s" }}
+      </span>
+    </div>
+
+    <div class="overflow-x-auto">
+      {% if mis_productos %}
+      <table class="w-full text-sm" id="tabla-inventario">
+        <thead>
+          <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-100">
+            <th class="px-6 py-3.5 text-left font-semibold">Imagen</th>
+            <th class="px-6 py-3.5 text-left font-semibold">SKU</th>
+            <th class="px-6 py-3.5 text-left font-semibold">Nombre</th>
+            <th class="px-6 py-3.5 text-left font-semibold">Categoría</th>
+            <th class="px-6 py-3.5 text-left font-semibold">Precio Público</th>
+            <th class="px-6 py-3.5 text-left font-semibold">Precio B2B</th>
+            <th class="px-6 py-3.5 text-left font-semibold">Stock</th>
+            <th class="px-6 py-3.5 text-left font-semibold">MOQ / Lote</th>
+            <th class="px-6 py-3.5 text-left font-semibold">Estado</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50">
+          {% for p in mis_productos %}
+          <tr class="hover:bg-slate-50 transition-colors group animate-fade-in">
+
+            <!-- Imagen miniatura -->
+            <td class="px-6 py-4">
+              <div class="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-slate-100 to-[#FB4318]/10 flex-shrink-0">
+                {% if p.imagen %}
+                  <img src="{{ p.imagen.url }}" alt="{{ p.nombre }}"
+                       class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                {% else %}
+                  <div class="w-full h-full flex items-center justify-center text-slate-300">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                {% endif %}
+              </div>
+            </td>
+
+            <!-- SKU -->
+            <td class="px-6 py-4">
+              <code class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md text-xs font-mono">{{ p.sku }}</code>
+            </td>
+
+            <!-- Nombre -->
+            <td class="px-6 py-4">
+              <p class="font-semibold text-slate-800 max-w-[200px] truncate" title="{{ p.nombre }}">{{ p.nombre }}</p>
+              <p class="text-xs text-slate-400 mt-0.5 max-w-[200px] truncate">{{ p.descripcion|truncatewords:6 }}</p>
+            </td>
+
+            <!-- Categoría -->
+            <td class="px-6 py-4">
+              <span class="px-2.5 py-1 rounded-lg text-xs font-semibold text-white"
+                    style="background: #FB4318;">
+                {{ p.categoria.nombre }}
+              </span>
+            </td>
+
+            <!-- Precio público -->
+            <td class="px-6 py-4">
+              <span class="font-semibold text-slate-700">${{ p.precio_publico }}</span>
+            </td>
+
+            <!-- Precio B2B -->
+            <td class="px-6 py-4">
+              <span class="font-bold text-emerald-600">${{ p.precio_minorista }}</span>
+              {% if p.precio_publico > p.precio_minorista %}
+              <span class="ml-1 text-xs text-emerald-500">
+                (-{% widthratio p.precio_minorista p.precio_publico 100 as pct %}{% widthratio 100|add:"-"|add:pct 1 1 %}%)
+              </span>
+              {% endif %}
+            </td>
+
+            <!-- Stock -->
+            <td class="px-6 py-4">
+              <span class="font-bold text-sm
+                           {% if p.stock_disponible == 0 %}text-red-500
+                           {% elif p.stock_disponible < 10 %}text-amber-500
+                           {% else %}text-slate-700{% endif %}">
+                {{ p.stock_disponible }} u.
+              </span>
+              {% if p.stock_disponible == 0 %}
+              <span class="block text-xs text-red-400 font-medium">Sin stock</span>
+              {% elif p.stock_disponible < 10 %}
+              <span class="block text-xs text-amber-500 font-medium">Stock bajo</span>
+              {% endif %}
+            </td>
+
+            <!-- MOQ / Lote -->
+            <td class="px-6 py-4">
+              <div class="flex flex-col gap-0.5">
+                {% if p.moq > 1 %}
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 border border-amber-200 rounded-md text-xs text-amber-700 font-medium w-fit">
+                  MOQ: {{ p.moq }}
+                </span>
+                {% endif %}
+                {% if p.multiplo_lote > 1 %}
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 border border-blue-200 rounded-md text-xs text-blue-700 font-medium w-fit">
+                  ×{{ p.multiplo_lote }}
+                </span>
+                {% endif %}
+                {% if p.moq <= 1 and p.multiplo_lote <= 1 %}
+                <span class="text-slate-300 text-xs">Por unidad</span>
+                {% endif %}
+              </div>
+            </td>
+
+            <!-- Estado -->
+            <td class="px-6 py-4">
+              {% if p.activo %}
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                Activo
+              </span>
+              {% else %}
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-500">
+                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                Inactivo
+              </span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% else %}
+      <!-- Estado vacío -->
+      <div class="text-center py-20 animate-fade-in">
+        <div class="w-24 h-24 mx-auto mb-6 rounded-3xl flex items-center justify-center shadow-xl shadow-[#FB4318]/10"
+             style="background: linear-gradient(135deg, #FB4318/10, #FFC22F/10); background: #fff3ef;">
+          <svg class="w-12 h-12 text-[#FB4318]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-slate-700 mb-2">Tu inventario está vacío</h3>
+        <p class="text-slate-400 mb-8 max-w-sm mx-auto">
+          Publica tu primer producto y empieza a recibir pedidos de minoristas en todo el país.
+        </p>
+        <button id="btn-abrir-modal-2"
+                class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-white font-bold shadow-xl hover:-translate-y-1 transition-all duration-200"
+                style="background: linear-gradient(135deg, #FB4318, #e03b14);">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Publicar mi primer producto
+        </button>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+</div>
+
+
+<!-- ================================================================
+     MODAL: FORMULARIO DE NUEVO PRODUCTO
+================================================================ -->
+<div id="modal-producto"
+     class="fixed inset-0 z-[200] flex items-center justify-center p-4
+            {% if mostrar_modal %}{% else %}hidden{% endif %}"
+     role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+
+  <!-- Overlay -->
+  <div id="modal-overlay" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+
+  <!-- Panel del modal -->
+  <div class="relative w-full max-w-3xl max-h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-slide-up">
+
+    <!-- Header del modal -->
+    <div class="flex items-center justify-between px-7 py-5 border-b border-slate-100"
+         style="background: linear-gradient(135deg, #FB4318, #e03b14);">
+      <div class="flex items-center gap-3">
+        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        <h2 id="modal-titulo" class="text-xl font-extrabold text-white">Publicar Nuevo Producto</h2>
+      </div>
+      <button id="btn-cerrar-modal"
+              class="p-2 rounded-xl bg-white/20 text-white hover:bg-white/30 transition-colors"
+              aria-label="Cerrar">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Cuerpo del formulario (scrollable) -->
+    <div class="overflow-y-auto flex-1 px-7 py-6">
+      <form id="form-producto"
+            method="post"
+            action="{% url 'inventario' %}"
+            enctype="multipart/form-data"
+            class="space-y-6"
+            novalidate>
+        {% csrf_token %}
+
+        <!-- Errores no de campo -->
+        {% if form.non_field_errors %}
+        <div class="p-4 bg-red-50 border border-red-200 rounded-2xl">
+          {% for error in form.non_field_errors %}
+          <p class="text-sm text-red-700 font-medium">❌ {{ error }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- ── Sección 1: Información Básica ─────────────────────── -->
+        <div>
+          <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs font-black"
+                  style="background: #FB4318;">1</span>
+            Información Básica
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Nombre -->
+            <div class="sm:col-span-2">
+              <label for="{{ form.nombre.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                {{ form.nombre.label }} <span class="text-red-500">*</span>
+              </label>
+              {{ form.nombre }}
+              {% if form.nombre.errors %}<p class="mt-1 text-xs text-red-500">{{ form.nombre.errors.0 }}</p>{% endif %}
+            </div>
+            <!-- SKU -->
+            <div>
+              <label for="{{ form.sku.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                {{ form.sku.label }} <span class="text-red-500">*</span>
+              </label>
+              {{ form.sku }}
+              {% if form.sku.errors %}<p class="mt-1 text-xs text-red-500">{{ form.sku.errors.0 }}</p>{% endif %}
+            </div>
+            <!-- Categoría -->
+            <div>
+              <label for="{{ form.categoria.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                {{ form.categoria.label }} <span class="text-red-500">*</span>
+              </label>
+              {{ form.categoria }}
+              {% if form.categoria.errors %}<p class="mt-1 text-xs text-red-500">{{ form.categoria.errors.0 }}</p>{% endif %}
+            </div>
+            <!-- Descripción -->
+            <div class="sm:col-span-2">
+              <label for="{{ form.descripcion.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                {{ form.descripcion.label }} <span class="text-red-500">*</span>
+              </label>
+              {{ form.descripcion }}
+              {% if form.descripcion.errors %}<p class="mt-1 text-xs text-red-500">{{ form.descripcion.errors.0 }}</p>{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Sección 2: Precios ─────────────────────────────────── -->
+        <div>
+          <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs font-black"
+                  style="background: #FB4318;">2</span>
+            Motor de Precios B2B
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Precio público -->
+            <div>
+              <label for="{{ form.precio_publico.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                {{ form.precio_publico.label }} <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">$</span>
+                <div style="padding-left: 1.75rem;">{{ form.precio_publico }}</div>
+              </div>
+              <p class="mt-1 text-xs text-slate-400">Visible para visitantes y consumidores.</p>
+              {% if form.precio_publico.errors %}<p class="mt-1 text-xs text-red-500">{{ form.precio_publico.errors.0 }}</p>{% endif %}
+            </div>
+            <!-- Precio minorista -->
+            <div>
+              <label for="{{ form.precio_minorista.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                {{ form.precio_minorista.label }} <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 font-bold text-sm">$</span>
+                <div style="padding-left: 1.75rem;">{{ form.precio_minorista }}</div>
+              </div>
+              <p class="mt-1 text-xs text-slate-400">Exclusivo para Minoristas verificados.</p>
+              {% if form.precio_minorista.errors %}<p class="mt-1 text-xs text-red-500">{{ form.precio_minorista.errors.0 }}</p>{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Sección 3: Reglas B2B ──────────────────────────────── -->
+        <div>
+          <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs font-black"
+                  style="background: #FFC22F; color: #1a0a00;">3</span>
+            Reglas de Venta B2B (MOQ y Lotes)
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Stock -->
+            <div>
+              <label for="{{ form.stock_disponible.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                {{ form.stock_disponible.label }} <span class="text-red-500">*</span>
+              </label>
+              {{ form.stock_disponible }}
+              {% if form.stock_disponible.errors %}<p class="mt-1 text-xs text-red-500">{{ form.stock_disponible.errors.0 }}</p>{% endif %}
+            </div>
+            <!-- MOQ -->
+            <div>
+              <label for="{{ form.moq.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                {{ form.moq.label }} <span class="text-red-500">*</span>
+              </label>
+              {{ form.moq }}
+              <p class="mt-1 text-xs text-amber-600">{{ form.moq.help_text }}</p>
+              {% if form.moq.errors %}<p class="mt-1 text-xs text-red-500">{{ form.moq.errors.0 }}</p>{% endif %}
+            </div>
+            <!-- Múltiplo de Lote -->
+            <div>
+              <label for="{{ form.multiplo_lote.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                {{ form.multiplo_lote.label }} <span class="text-red-500">*</span>
+              </label>
+              {{ form.multiplo_lote }}
+              <p class="mt-1 text-xs text-blue-600">{{ form.multiplo_lote.help_text }}</p>
+              {% if form.multiplo_lote.errors %}<p class="mt-1 text-xs text-red-500">{{ form.multiplo_lote.errors.0 }}</p>{% endif %}
+            </div>
+          </div>
+          <!-- Aviso B2B -->
+          <div class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2">
+            <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <p class="text-xs text-amber-700">
+              <strong>Regla B2B:</strong> El MOQ debe ser múltiplo del lote. Ej: si el lote es 12, el MOQ puede ser 12, 24, 36...
+            </p>
+          </div>
+        </div>
+
+        <!-- ── Sección 4: Imagen y Estado ───────────────────────── -->
+        <div>
+          <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs font-black"
+                  style="background: #FB4318;">4</span>
+            Imagen y Visibilidad
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="{{ form.imagen.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                {{ form.imagen.label }}
+              </label>
+              {{ form.imagen }}
+              <p class="mt-1 text-xs text-slate-400">Recomendado: 800×800px, máx 2MB.</p>
+              {% if form.imagen.errors %}<p class="mt-1 text-xs text-red-500">{{ form.imagen.errors.0 }}</p>{% endif %}
+            </div>
+            <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 h-fit self-end">
+              {{ form.activo }}
+              <div>
+                <label for="{{ form.activo.id_for_label }}" class="text-sm font-semibold text-slate-700 cursor-pointer">
+                  {{ form.activo.label }}
+                </label>
+                <p class="text-xs text-slate-400 mt-0.5">Si está marcado, aparece en el catálogo.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Footer del modal -->
+    <div class="px-7 py-5 border-t border-slate-100 bg-slate-50 flex items-center justify-between gap-3">
+      <button type="button"
+              id="btn-cancelar-modal"
+              class="px-6 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-100 transition-colors">
+        Cancelar
+      </button>
+      <button type="submit"
+              form="form-producto"
+              id="btn-guardar-producto"
+              class="flex items-center gap-2 px-8 py-2.5 rounded-xl text-white text-sm font-bold shadow-lg shadow-[#FB4318]/30 hover:-translate-y-0.5 transition-all duration-200"
+              style="background: linear-gradient(135deg, #FB4318, #e03b14);">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Publicar en el Catálogo
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // ── Control del Modal ──────────────────────────────────────────────────
+  const modal       = document.getElementById('modal-producto');
+  const overlay     = document.getElementById('modal-overlay');
+  const btnAbrir    = document.getElementById('btn-abrir-modal');
+  const btnAbrir2   = document.getElementById('btn-abrir-modal-2');
+  const btnCerrar   = document.getElementById('btn-cerrar-modal');
+  const btnCancelar = document.getElementById('btn-cancelar-modal');
+
+  function abrirModal() {
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrarModal() {
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  btnAbrir?.addEventListener('click', abrirModal);
+  btnAbrir2?.addEventListener('click', abrirModal);
+  btnCerrar?.addEventListener('click', cerrarModal);
+  btnCancelar?.addEventListener('click', cerrarModal);
+  overlay?.addEventListener('click', cerrarModal);
+
+  // Cerrar con Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') cerrarModal();
+  });
+
+  // ── Indicador de carga al enviar el formulario ─────────────────────────
+  document.getElementById('form-producto')?.addEventListener('submit', function () {
+    const btn = document.getElementById('btn-guardar-producto');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `
+        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+        </svg>
+        Publicando...
+      `;
+    }
+  });
+</script>
+{% endblock %}

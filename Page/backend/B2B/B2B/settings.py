@@ -40,10 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # --- Librerías de Terceros ---
-    'rest_framework',      # Para construir la API
-    'corsheaders',         # Para permitir que Next.js se conecte
-    # --- Mis Aplicaciones B2B ---
+    # --- Librerías de Terceros (se mantienen para la API REST si se necesita) ---
+    'rest_framework',
+    'corsheaders',
+    # --- Aplicaciones MVT B2B ---
+    'core',          # App principal: vistas, templates, carrito, forms
     'catalog',
     'users',
     'orders',
@@ -66,13 +67,17 @@ ROOT_URLCONF = 'B2B.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        # Apunta a la carpeta global de templates en la raíz del proyecto
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # Context processor para el badge del carrito en el navbar
+                'core.context_processors.carrito_global',
             ],
         },
     },
@@ -118,9 +123,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-ec'   # Español Ecuador
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Guayaquil'
 
 USE_I18N = True
 
@@ -130,29 +135,49 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Media files (Imágenes de productos, documentos de verificación)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Le decimos a Django que este es el nuevo modelo de usuarios globals
+# Modelo de usuario personalizado
 AUTH_USER_MODEL = 'users.CustomUser'
 
-# Permitir que el Frontend (localhost:3000) consuma nuestra API
-CORS_ALLOW_ALL_ORIGINS = True  # Ojo: En producción cambiaremos esto solo al dominio oficial
+# -----------------------------------------------------------------------
+# AUTENTICACIÓN MVT — Sesiones nativas de Django
+# -----------------------------------------------------------------------
+LOGIN_URL = 'login'           # URL a la que redirige @login_required
+LOGIN_REDIRECT_URL = 'catalogo'  # Tras login exitoso
+LOGOUT_REDIRECT_URL = 'login'   # Tras logout
+
+# Configuración de sesiones (cookie-based, almacenadas en DB)
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 7 días
+SESSION_SAVE_EVERY_REQUEST = False
+
+# -----------------------------------------------------------------------
+# API REST (se mantiene para endpoints de integración futura)
+# -----------------------------------------------------------------------
+# Permite peticiones desde herramientas de testing o apps móviles
+CORS_ALLOW_ALL_ORIGINS = True  # Cambiar al dominio real en producción
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
 }
 
+# JWT se mantiene disponible para integraciones de API externas
 from datetime import timedelta
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1), # El token expira en 1 día
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}B2B Market — Plataforma de Distribución{% endblock %}
+{% block meta_description %}Plataforma B2B de distribución mayorista y minorista. Precios exclusivos, gestión de pedidos y catálogo digital.{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<div class="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-slate-900 text-white">
+  <!-- Decorative circles -->
+  <div class="absolute top-0 right-0 w-96 h-96 bg-brand-600/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
+  <div class="absolute bottom-0 left-0 w-80 h-80 bg-brand-400/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4"></div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center animate-fade-in">
+    <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium mb-8 border border-white/20">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      Plataforma B2B en línea
+    </div>
+    <h1 class="text-5xl md:text-7xl font-black leading-none tracking-tight mb-6">
+      Distribuye al<br />
+      <span class="bg-gradient-to-r from-brand-300 to-emerald-300 bg-clip-text text-transparent">
+        por mayor
+      </span>
+    </h1>
+    <p class="text-xl text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed">
+      Conectamos mayoristas y minoristas en una sola plataforma. Precios exclusivos B2B, gestión de pedidos y catálogo digital.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="{% url 'registro' %}"
+         class="px-8 py-4 rounded-2xl bg-white text-brand-700 font-bold text-lg hover:shadow-2xl hover:shadow-white/20 hover:-translate-y-1 transition-all duration-200">
+        Comenzar gratis →
+      </a>
+      <a href="{% url 'catalogo' %}"
+         class="px-8 py-4 rounded-2xl border-2 border-white/30 text-white font-bold text-lg hover:bg-white/10 hover:border-white/50 transition-all duration-200">
+        Ver catálogo
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+  <div class="text-center mb-14">
+    <h2 class="text-3xl font-extrabold text-slate-900 mb-3">Todo lo que necesitas para crecer</h2>
+    <p class="text-slate-500 text-lg">Herramientas profesionales para mayoristas y minoristas</p>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    {% for feature in features %}
+    <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:border-brand-200 hover:-translate-y-1 transition-all duration-300 text-center group">
+      <div class="w-14 h-14 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-brand-100 to-brand-200 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+        {{ feature.icon }}
+      </div>
+      <h3 class="text-lg font-bold text-slate-800 mb-2">{{ feature.title }}</h3>
+      <p class="text-slate-500 text-sm leading-relaxed">{{ feature.desc }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

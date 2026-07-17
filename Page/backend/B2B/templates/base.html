@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="{% block meta_description %}Bazar B2B — Plataforma de distribución mayorista y minorista. Conectamos proveedores con tiendas a precios exclusivos.{% endblock %}" />
+  <title>{% block title %}Bazar B2B{% endblock %} | Bazar B2B — ISBEN Solution</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN (MVP) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            // ── Paleta Corporativa ISBEN Solution ──────────────────────
+            brand: {
+              DEFAULT: '#FB4318',   // Naranja-rojo corporativo
+              50:  '#fff3ef',
+              100: '#ffe4da',
+              200: '#ffc5b0',
+              300: '#ff9a7a',
+              400: '#ff6644',
+              500: '#FB4318',       // ← Color principal
+              600: '#e03b14',
+              700: '#bc2f0f',
+              800: '#9a270d',
+              900: '#7d2010',
+            },
+            gold: {
+              DEFAULT: '#FFC22F',   // Amarillo dorado corporativo
+              50:  '#fffbeb',
+              100: '#fef3c7',
+              200: '#fde68a',
+              300: '#FFC22F',       // ← Color secundario
+              400: '#f59e0b',
+              500: '#d97706',
+            },
+          },
+          animation: {
+            'fade-in':  'fadeIn 0.4s ease-out',
+            'slide-up': 'slideUp 0.4s ease-out',
+            'slide-in-right': 'slideInRight 0.35s ease-out',
+          },
+          keyframes: {
+            fadeIn:       { '0%': { opacity: '0' },                                        '100%': { opacity: '1' } },
+            slideUp:      { '0%': { opacity: '0', transform: 'translateY(16px)' },         '100%': { opacity: '1', transform: 'translateY(0)' } },
+            slideInRight: { '0%': { opacity: '0', transform: 'translateX(100%)' },         '100%': { opacity: '1', transform: 'translateX(0)' } },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+
+    /* Scrollbar con colores de marca */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: #FB4318; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #e03b14; }
+
+    /* Animaciones */
+    .animate-fade-in  { animation: fadeIn 0.4s ease-out; }
+    .animate-slide-up { animation: slideUp 0.4s ease-out; }
+    .animate-slide-in-right { animation: slideInRight 0.35s ease-out; }
+
+    @keyframes fadeIn       { from { opacity: 0; }                              to { opacity: 1; } }
+    @keyframes slideUp      { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+
+    /* Gradient brand */
+    .brand-gradient { background: linear-gradient(135deg, #FB4318 0%, #e03b14 100%); }
+    .gold-gradient  { background: linear-gradient(135deg, #FFC22F 0%, #f59e0b 100%); }
+    .hero-gradient  { background: linear-gradient(135deg, #1a0a00 0%, #3d1200 40%, #7d2010 100%); }
+
+    /* Navbar link activo */
+    .nav-active { color: #FB4318; border-bottom: 2px solid #FB4318; }
+
+    /* Botón de marca primario */
+    .btn-brand {
+      background: linear-gradient(135deg, #FB4318, #e03b14);
+      color: white;
+      border-radius: 0.75rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-brand:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(251, 67, 24, 0.35);
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, #FFC22F, #f59e0b);
+      color: #1a0a00;
+      border-radius: 0.75rem;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .btn-gold:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(255, 194, 47, 0.40);
+    }
+  </style>
+
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- ================================================================
+       NAVBAR RESPONSIVO — Paleta ISBEN Solution
+  ================================================================ -->
+  <nav class="sticky top-0 z-50 bg-white border-b-2 border-[#FB4318]/20 shadow-md shadow-[#FB4318]/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+
+        <!-- Logo ISBEN / Bazar B2B -->
+        <a href="{% url 'home' %}" class="flex items-center gap-3 group">
+          <!-- ISO mark (guepardo) como ícono del navbar -->
+          <div class="w-9 h-9 rounded-xl overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform duration-200 shadow-md shadow-[#FB4318]/20">
+            <img src="/media/brand/iso.png"
+                 alt="ISBEN Solution"
+                 class="w-full h-full object-cover"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+            <!-- Fallback SVG si no hay imagen -->
+            <div class="w-full h-full brand-gradient hidden items-center justify-center text-white font-black text-sm">B</div>
+          </div>
+          <div class="flex flex-col leading-none">
+            <span class="text-base font-black tracking-tight" style="color: #FB4318;">BAZAR B2B</span>
+            <span class="text-[10px] font-semibold tracking-widest uppercase" style="color: #FFC22F;">by ISBEN Solution</span>
+          </div>
+        </a>
+
+        <!-- Nav Links (Desktop) -->
+        <div class="hidden md:flex items-center gap-1">
+          <a href="{% url 'catalogo' %}"
+             class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-[#FB4318] hover:bg-[#FB4318]/5 transition-all duration-200
+                    {% if request.resolver_match.url_name == 'catalogo' %}text-[#FB4318] bg-[#FB4318]/8 font-semibold{% endif %}">
+            🏪 Catálogo
+          </a>
+          {% if user.is_authenticated %}
+          <a href="{% url 'dashboard' %}"
+             class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-[#FB4318] hover:bg-[#FB4318]/5 transition-all duration-200
+                    {% if request.resolver_match.url_name == 'dashboard' %}text-[#FB4318] bg-[#FB4318]/8 font-semibold{% endif %}">
+            📊 Dashboard
+          </a>
+          {% if user.rol == 'MAYORISTA' %}
+          <a href="{% url 'inventario' %}"
+             class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-[#FB4318] hover:bg-[#FB4318]/5 transition-all duration-200
+                    {% if request.resolver_match.url_name == 'inventario' %}text-[#FB4318] bg-[#FB4318]/8 font-semibold{% endif %}">
+            📦 Inventario
+          </a>
+          <a href="{% url 'suscripciones' %}"
+             class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-[#FFC22F] hover:bg-[#FFC22F]/10 transition-all duration-200
+                    {% if request.resolver_match.url_name == 'suscripciones' %}text-[#FFC22F] bg-[#FFC22F]/10 font-semibold{% endif %}">
+            ⭐ Planes
+          </a>
+          {% endif %}
+          {% endif %}
+        </div>
+
+        <!-- Acciones Right -->
+        <div class="flex items-center gap-3">
+
+          {% if user.is_authenticated %}
+            <!-- Carrito badge -->
+            <a href="{% url 'carrito' %}"
+               id="nav-carrito-btn"
+               class="relative flex items-center gap-2 px-3 py-2 rounded-xl border border-[#FB4318]/30 text-[#FB4318] hover:bg-[#FB4318]/5 transition-all duration-200 font-medium text-sm">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <span class="hidden sm:inline">Carrito</span>
+              {% if total_carrito and total_carrito > 0 %}
+              <span id="carrito-badge"
+                    class="absolute -top-2 -right-2 w-5 h-5 rounded-full text-white text-xs font-bold flex items-center justify-center animate-pulse"
+                    style="background: #FB4318;">
+                {{ total_carrito }}
+              </span>
+              {% endif %}
+            </a>
+
+            <!-- User Menu Dropdown -->
+            <div class="relative group">
+              <button class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100 transition-all duration-200">
+                <!-- Avatar con inicial -->
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md"
+                     style="background: linear-gradient(135deg, #FB4318, #e03b14);">
+                  {{ user.username|first|upper }}
+                </div>
+                <div class="hidden md:block text-left">
+                  <p class="text-sm font-semibold text-slate-700 leading-none">{{ user.first_name|default:user.username }}</p>
+                  <p class="text-xs text-slate-400 leading-none mt-0.5">
+                    {% if user.rol == 'MAYORISTA' %}🏭 Proveedor
+                    {% elif user.rol == 'MINORISTA' %}🏪 Minorista B2B
+                    {% elif user.rol == 'ADMIN' %}⚡ Admin
+                    {% else %}👤 {{ user.get_rol_display }}{% endif %}
+                  </p>
+                </div>
+                <svg class="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <!-- Dropdown -->
+              <div class="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 translate-y-1 group-hover:translate-y-0">
+                <a href="{% url 'dashboard' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-[#FB4318] transition-colors">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                  Mi Dashboard
+                </a>
+                {% if user.rol == 'MAYORISTA' %}
+                <a href="{% url 'inventario' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-[#FB4318] transition-colors">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                  Mi Inventario
+                </a>
+                <a href="{% url 'suscripciones' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-[#FFC22F]/10 hover:text-[#d97706] transition-colors">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
+                  Mis Planes
+                </a>
+                {% endif %}
+                <hr class="my-1 border-slate-100" />
+                <form method="post" action="{% url 'logout' %}">
+                  {% csrf_token %}
+                  <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                    Cerrar sesión
+                  </button>
+                </form>
+              </div>
+            </div>
+
+          {% else %}
+            <!-- Botones no autenticado -->
+            <a href="{% url 'registro' %}"
+               class="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-slate-600 hover:text-[#FB4318] transition-colors">
+              Registrarse
+            </a>
+            <a href="{% url 'login' %}"
+               class="px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-all duration-200 btn-brand">
+              Iniciar sesión
+            </a>
+          {% endif %}
+
+          <!-- Hamburger (Mobile) -->
+          <button id="mobile-menu-btn"
+                  class="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+                  aria-label="Menú móvil">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div id="mobile-menu" class="hidden md:hidden border-t border-slate-100 py-3 space-y-1 animate-slide-up">
+        <a href="{% url 'catalogo' %}" class="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-[#FB4318]/5 hover:text-[#FB4318] transition-colors">🏪 Catálogo</a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}" class="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-[#FB4318]/5 hover:text-[#FB4318] transition-colors">📊 Dashboard</a>
+        <a href="{% url 'carrito' %}" class="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-[#FB4318]/5 hover:text-[#FB4318] transition-colors">🛒 Carrito {% if total_carrito > 0 %}({{ total_carrito }}){% endif %}</a>
+        {% if user.rol == 'MAYORISTA' %}
+        <a href="{% url 'inventario' %}" class="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-[#FB4318]/5 hover:text-[#FB4318] transition-colors">📦 Inventario</a>
+        <a href="{% url 'suscripciones' %}" class="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-[#FFC22F]/10 hover:text-[#d97706] transition-colors">⭐ Planes</a>
+        {% endif %}
+        {% else %}
+        <a href="{% url 'registro' %}" class="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-[#FB4318]/5 hover:text-[#FB4318] transition-colors">Registrarse</a>
+        <a href="{% url 'login' %}" class="block px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-[#FB4318]/5 hover:text-[#FB4318] transition-colors">Iniciar sesión</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <!-- ================================================================
+       MENSAJES DE DJANGO — Toast Notifications con colores de marca
+  ================================================================ -->
+  {% if messages %}
+  <div id="messages-container" class="fixed top-20 right-4 z-[100] space-y-3 max-w-sm w-full animate-fade-in pointer-events-none">
+    {% for message in messages %}
+    <div class="flex items-start gap-3 p-4 rounded-2xl shadow-xl border pointer-events-auto animate-slide-in-right
+                {% if message.tags == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-800
+                {% elif message.tags == 'error' %}bg-red-50 border-red-200 text-red-800
+                {% elif message.tags == 'warning' %}bg-amber-50 border-amber-200 text-amber-800
+                {% else %}bg-blue-50 border-blue-200 text-blue-800{% endif %}
+                message-toast"
+         role="alert">
+      <!-- Ícono por tipo -->
+      <div class="flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-sm
+                  {% if message.tags == 'success' %}bg-emerald-100
+                  {% elif message.tags == 'error' %}bg-red-100
+                  {% elif message.tags == 'warning' %}bg-amber-100
+                  {% else %}bg-blue-100{% endif %}">
+        {% if message.tags == 'success' %}✅
+        {% elif message.tags == 'error' %}❌
+        {% elif message.tags == 'warning' %}⚠️
+        {% else %}ℹ️{% endif %}
+      </div>
+      <p class="text-sm font-medium leading-snug flex-1">{{ message }}</p>
+      <button onclick="this.closest('.message-toast').remove()"
+              class="flex-shrink-0 opacity-50 hover:opacity-100 transition-opacity ml-1">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ================================================================
+       CONTENIDO PRINCIPAL
+  ================================================================ -->
+  <main class="flex-1 {% block main_class %}{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ================================================================
+       FOOTER
+  ================================================================ -->
+  <footer class="bg-white border-t-2 border-[#FB4318]/10 mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <!-- Logo footer -->
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl overflow-hidden shadow-md shadow-[#FB4318]/20">
+            <img src="/media/brand/iso.png" alt="ISBEN" class="w-full h-full object-cover"
+                 onerror="this.style.display='none'; this.parentElement.style.background='#FB4318';" />
+          </div>
+          <div>
+            <p class="font-black text-sm" style="color: #FB4318;">BAZAR B2B</p>
+            <p class="text-xs font-semibold tracking-widest uppercase" style="color: #FFC22F;">ISBEN Solution</p>
+          </div>
+        </div>
+        <p class="text-sm text-slate-400">© 2025 Bazar B2B — ISBEN Solution. Plataforma de distribución mayorista.</p>
+        <div class="flex gap-4 text-sm text-slate-400">
+          <a href="#" class="hover:text-[#FB4318] transition-colors">Términos</a>
+          <a href="#" class="hover:text-[#FB4318] transition-colors">Privacidad</a>
+          <a href="#" class="hover:text-[#FB4318] transition-colors">Contacto</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================================================================
+       SCRIPTS GLOBALES
+  ================================================================ -->
+  <script>
+    // Toggle Mobile Menu
+    document.getElementById('mobile-menu-btn')?.addEventListener('click', function () {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    });
+
+    // Auto-dismiss toasts after 5s
+    setTimeout(function () {
+      document.querySelectorAll('.message-toast').forEach(function (el) {
+        el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(100%)';
+        setTimeout(() => el.remove(), 500);
+      });
+    }, 5000);
+  </script>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

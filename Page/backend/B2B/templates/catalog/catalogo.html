@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Catálogo de Productos{% endblock %}
+{% block meta_description %}Explora nuestro catálogo B2B. Precios exclusivos para mayoristas y minoristas verificados.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in">
+
+  <!-- ============================================================
+       CABECERA DEL CATÁLOGO
+  ============================================================ -->
+  <div class="mb-10">
+    <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">
+      Catálogo de Productos
+    </h1>
+    <p class="mt-2 text-slate-500 text-lg">
+      {% if user.is_authenticated and user.rol == 'MINORISTA' and user.empresa_verificada %}
+        🏪 Estás viendo <span class="font-semibold text-brand-600">precios de mayoreo exclusivos</span> para tu tienda.
+      {% elif user.is_authenticated and user.rol == 'MINORISTA' and not user.empresa_verificada %}
+        ⏳ Tu cuenta está <span class="font-semibold text-amber-600">pendiente de verificación</span>. Mientras tanto, ves precios públicos.
+      {% elif user.is_authenticated and user.rol == 'MAYORISTA' %}
+        🏭 Vista del <span class="font-semibold text-brand-600">Mayorista</span>. Aquí puedes ver el catálogo completo.
+      {% else %}
+        Regístrate como Minorista para acceder a precios B2B exclusivos.
+      {% endif %}
+    </p>
+  </div>
+
+  <!-- ============================================================
+       BARRA DE FILTROS Y BÚSQUEDA
+  ============================================================ -->
+  <div class="flex flex-col lg:flex-row gap-4 mb-8">
+
+    <!-- Búsqueda -->
+    <form method="get" action="{% url 'catalogo' %}" class="flex-1">
+      <div class="relative">
+        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          id="busqueda-input"
+          type="text"
+          name="q"
+          value="{{ busqueda }}"
+          placeholder="Buscar productos, SKU, descripción..."
+          class="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-slate-200 bg-white shadow-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all" />
+        {% if categoria_activa %}
+          <input type="hidden" name="categoria" value="{{ categoria_activa }}" />
+        {% endif %}
+      </div>
+    </form>
+
+    <!-- Filtro por Categoría -->
+    <div class="flex flex-wrap gap-2 items-center">
+      <a href="{% url 'catalogo' %}{% if busqueda %}?q={{ busqueda }}{% endif %}"
+         class="px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                {% if not categoria_activa %}bg-brand-600 text-white shadow-md shadow-brand-500/30{% else %}bg-white border border-slate-200 text-slate-600 hover:border-brand-400 hover:text-brand-600{% endif %}">
+        Todos
+      </a>
+      {% for cat in categorias %}
+      <a href="{% url 'catalogo' %}?categoria={{ cat.slug }}{% if busqueda %}&q={{ busqueda }}{% endif %}"
+         class="px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                {% if categoria_activa == cat.slug %}bg-brand-600 text-white shadow-md shadow-brand-500/30{% else %}bg-white border border-slate-200 text-slate-600 hover:border-brand-400 hover:text-brand-600{% endif %}">
+        {{ cat.nombre }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ============================================================
+       GRID DE PRODUCTOS
+  ============================================================ -->
+  {% if productos_con_precio %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="productos-grid">
+      {% for item in productos_con_precio %}
+      {% with p=item.producto %}
+      <article class="group bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 hover:border-brand-200 transition-all duration-300 overflow-hidden animate-slide-up flex flex-col"
+               style="animation-delay: {{ forloop.counter0 }}00ms">
+
+        <!-- Imagen del Producto -->
+        <div class="relative overflow-hidden bg-gradient-to-br from-slate-100 to-brand-50 aspect-square">
+          {% if p.imagen %}
+            <img src="{{ p.imagen.url }}"
+                 alt="{{ p.nombre }}"
+                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          {% else %}
+            <div class="w-full h-full flex items-center justify-center">
+              <svg class="w-16 h-16 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+            </div>
+          {% endif %}
+
+          <!-- Badges -->
+          <div class="absolute top-3 left-3 flex flex-col gap-1.5">
+            <span class="px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-xs font-semibold text-slate-600 shadow-sm border border-slate-100">
+              {{ p.categoria.nombre }}
+            </span>
+            {% if p.moq > 1 %}
+            <span class="px-2.5 py-1 bg-amber-500/90 backdrop-blur-sm rounded-lg text-xs font-bold text-white shadow-sm">
+              MOQ: {{ p.moq }}
+            </span>
+            {% endif %}
+          </div>
+
+          {% if item.en_carrito %}
+          <div class="absolute top-3 right-3">
+            <span class="px-2.5 py-1 bg-emerald-500 rounded-lg text-xs font-bold text-white shadow-sm">
+              ✓ En carrito
+            </span>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Información del Producto -->
+        <div class="flex flex-col flex-1 p-5">
+          <div class="mb-auto">
+            <p class="text-xs text-slate-400 font-mono mb-1">SKU: {{ p.sku }}</p>
+            <h2 class="text-base font-bold text-slate-800 leading-snug mb-2 line-clamp-2">{{ p.nombre }}</h2>
+            <p class="text-sm text-slate-500 line-clamp-2 mb-3">{{ p.descripcion }}</p>
+
+            <!-- Reglas B2B -->
+            {% if p.multiplo_lote > 1 or p.moq > 1 %}
+            <div class="flex flex-wrap gap-1.5 mb-3">
+              {% if p.moq > 1 %}
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 border border-amber-200 rounded-md text-xs text-amber-700 font-medium">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                Mín. {{ p.moq }} u.
+              </span>
+              {% endif %}
+              {% if p.multiplo_lote > 1 %}
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 border border-blue-200 rounded-md text-xs text-blue-700 font-medium">
+                📦 Lotes de {{ p.multiplo_lote }}
+              </span>
+              {% endif %}
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Precio + Stock -->
+          <div class="border-t border-slate-100 pt-4 mt-3">
+            <div class="flex items-end justify-between mb-4">
+              <div>
+                <!-- Precio según Rol -->
+                {% if user.is_authenticated and user.rol == 'MINORISTA' and user.empresa_verificada %}
+                  <div class="flex flex-col">
+                    <span class="text-xs text-slate-400 line-through">${{ p.precio_publico }}</span>
+                    <span class="text-2xl font-extrabold text-emerald-600">${{ item.precio_mostrar }}</span>
+                    <span class="text-xs font-semibold text-emerald-500">Precio Mayoreo B2B</span>
+                  </div>
+                {% else %}
+                  <span class="text-2xl font-extrabold text-brand-700">${{ item.precio_mostrar }}</span>
+                {% endif %}
+              </div>
+              <div class="text-right">
+                <span class="text-xs text-slate-400">Stock</span>
+                <p class="text-sm font-bold {% if p.stock_disponible < 10 %}text-red-500{% else %}text-slate-700{% endif %}">
+                  {{ p.stock_disponible }} u.
+                </p>
+              </div>
+            </div>
+
+            <!-- Formulario Agregar al Carrito -->
+            {% if user.is_authenticated %}
+              <form method="post" action="{% url 'agregar_carrito' %}" class="space-y-2">
+                {% csrf_token %}
+                <input type="hidden" name="producto_id" value="{{ p.id }}" />
+                <div class="flex gap-2">
+                  <input
+                    type="number"
+                    name="cantidad"
+                    id="cantidad-{{ p.id }}"
+                    value="{{ p.moq }}"
+                    min="{{ p.moq }}"
+                    step="{{ p.multiplo_lote }}"
+                    class="w-20 text-center px-3 py-2.5 rounded-xl border border-slate-200 text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all text-sm" />
+                  <button
+                    type="submit"
+                    class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-700 text-white text-sm font-semibold hover:shadow-lg hover:shadow-brand-500/30 hover:-translate-y-0.5 transition-all duration-200 active:translate-y-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    Agregar
+                  </button>
+                </div>
+              </form>
+            {% else %}
+              <a href="{% url 'login' %}?next={% url 'catalogo' %}"
+                 class="block w-full text-center py-2.5 px-4 rounded-xl border-2 border-brand-500 text-brand-600 text-sm font-semibold hover:bg-brand-50 transition-all duration-200">
+                Iniciar sesión para comprar
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </article>
+      {% endwith %}
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <!-- Estado Vacío -->
+    <div class="text-center py-20 animate-fade-in">
+      <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-slate-100 flex items-center justify-center">
+        <svg class="w-12 h-12 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-slate-700 mb-2">No se encontraron productos</h3>
+      <p class="text-slate-400 mb-6">Intenta con otra búsqueda o elimina los filtros activos.</p>
+      <a href="{% url 'catalogo' %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand-600 text-white font-semibold hover:bg-brand-700 transition-colors">
+        Ver todos los productos
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
