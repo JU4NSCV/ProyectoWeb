@@ -10,7 +10,6 @@ Asegúrate de tener instalados los siguientes programas en tu computadora:
 
 - **Git**: Para clonar el repositorio. [Descargar Git](https://git-scm.com/)
 - **Docker y Docker Compose**: (Recomendado) Para levantar todo el sistema con un solo comando. [Descargar Docker](https://www.docker.com/)
-- **Node.js (v18 o superior)** y **pnpm**: Requerido si deseas ejecutar el Frontend localmente. [Descargar Node.js](https://nodejs.org/) (pnpm se instala con `npm install -g pnpm`).
 - **Python (v3.11 o superior)**: Requerido si deseas ejecutar el Backend localmente sin Docker. [Descargar Python](https://www.python.org/)
 
 ---
@@ -28,7 +27,7 @@ cd ProyectoWeb
 
 ## 🐋 Método A: Ejecución Rápida con Docker (Recomendado)
 
-Este método levantará automáticamente la base de datos PostgreSQL, el servidor Backend en Django y la interfaz Frontend en Next.js.
+Este método levantará automáticamente la base de datos PostgreSQL y el servidor Backend en Django.
 
 ### 1. Configurar las Variables de Entorno
 
@@ -67,9 +66,8 @@ cd Page
 docker compose up --build
 ```
 
-Este comando construirá las imágenes necesarias para el Backend y Frontend, migrará la base de datos y expondrá los servicios en los siguientes puertos:
+Este comando construirá la imagen necesaria para el Backend, migrará la base de datos y expondrá los servicios en los siguientes puertos:
 
-- 🌐 **Frontend (Next.js)**: [http://localhost:3000](http://localhost:3000)
 - ⚙️ **Backend (Django)**: [http://localhost:8000](http://localhost:8000)
 - 🐘 **Base de Datos (Postgres)**: `localhost:5432`
 
@@ -158,31 +156,9 @@ Tienes dos opciones para la base de datos:
 
 ---
 
-### 3. Configurar el Frontend (Next.js)
-
-1. Abre una nueva terminal y navega al directorio del frontend:
-   ```bash
-   cd Page/frontend/bazar
-   ```
-2. Asegúrate de tener `pnpm` instalado. Si no lo tienes, instálalo con:
-   ```bash
-   npm install -g pnpm
-   ```
-3. Instala las dependencias del proyecto:
-   ```bash
-   pnpm install
-   ```
-4. Inicia el servidor de desarrollo del frontend:
-   ```bash
-   pnpm run dev
-   ```
-   El frontend estará corriendo en [http://localhost:3000](http://localhost:3000).
-
----
-
 ## 🔒 Seguridad en Repositorios Públicos
 
 Este proyecto ha sido configurado para ser 100% seguro de subir a repositorios públicos:
 
-1. **Ignorados de Git:** Los archivos `.env` (credenciales de base de datos y llaves secretas), carpetas `node_modules/`, carpetas de build `.next/` y entornos virtuales de Python (`entorno/`, `venv/`) están configurados en el archivo [Page/.gitignore](file:///home/bas/Documents/ProyectoWeb/Page/.gitignore) y [.gitignore](file:///home/bas/Documents/ProyectoWeb/.gitignore) global.
+1. **Ignorados de Git:** Los archivos `.env` (credenciales de base de datos y llaves secretas) y entornos virtuales de Python (`entorno/`, `venv/`) están configurados en el archivo [Page/.gitignore](file:///home/bas/Documents/ProyectoWeb/Page/.gitignore) y [.gitignore](file:///home/bas/Documents/ProyectoWeb/.gitignore) global.
 2. **Settings Seguros:** Django está configurado para cargar dinámicamente el `SECRET_KEY` y el estado `DEBUG` desde las variables de entorno. Nunca escribas credenciales reales en [Page/backend/B2B/B2B/settings.py](file:///home/bas/Documents/ProyectoWeb/Page/backend/B2B/B2B/settings.py).
