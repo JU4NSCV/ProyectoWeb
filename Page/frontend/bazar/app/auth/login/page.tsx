@@ -1,16 +1,24 @@
 "use client";
 // ============================================================
 // app/auth/login/page.tsx — Página de Inicio de Sesión B2B
+// ★ REAL AUTH: Conectado con Django JWT + authStore + Toasts
 // ============================================================
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Eye, EyeOff, LogIn, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff, LogIn, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { loginUsuario } from "@/lib/api";
+import { useAuthStore } from "@/store/authStore";
+import { useToastStore } from "@/store/toastStore";
 
 export default function PaginaLogin() {
-  const [email, setEmail]         = useState("");
+  const router = useRouter();
+  const { login } = useAuthStore();
+  const toast    = useToastStore();
+
+  const [username, setUsername]   = useState("");
   const [password, setPassword]   = useState("");
   const [verPass, setVerPass]     = useState(false);
   const [cargando, setCargando]   = useState(false);
@@ -19,15 +27,44 @@ export default function PaginaLogin() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Validación básica en cliente
+    if (!username.trim()) {
+      setError("Ingresa tu nombre de usuario.");
+      return;
+    }
+    if (!password) {
+      setError("Ingresa tu contraseña.");
+      return;
+    }
+
     setCargando(true);
     try {
-      const tokens = await loginUsuario(email, password);
-      // Guardar tokens JWT y redirigir al catálogo
-      localStorage.setItem("access_token", tokens.access);
-      localStorage.setItem("refresh_token", tokens.refresh);
-      window.location.href = "/";
-    } catch {
-      setError("Credenciales incorrectas. Verifica tu correo y contraseña.");
+      // ★ Petición REAL a Django: POST /api/token/
+      const tokens = await loginUsuario(username.trim(), password);
+
+      // ★ Guardar en authStore (que persiste en localStorage y decodifica JWT)
+      login(tokens.access, tokens.refresh);
+
+      // ★ Toast de éxito
+      toast.exito(
+        "¡Sesión iniciada!",
+        "Bienvenido de vuelta. Redirigiendo al catálogo..."
+      );
+
+      // ★ Redirigir al catálogo tras login exitoso
+      router.push("/");
+      router.refresh(); // Forzar re-render del layout para actualizar Navbar
+
+    } catch (err) {
+      // ★ Django devuelve 401 con credenciales inválidas
+      const mensaje =
+        err instanceof Error && err.message.includes("401")
+          ? "Credenciales incorrectas. Verifica tu usuario y contraseña."
+          : "No se pudo conectar con el servidor. Intenta más tarde.";
+
+      setError(mensaje);
+      toast.error("Error al iniciar sesión", mensaje);
     } finally {
       setCargando(false);
     }
@@ -35,9 +72,15 @@ export default function PaginaLogin() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Panel izquierdo — Branding */}
+      {/* ── Panel izquierdo — Branding ───────────────────────── */}
       <div className="hidden lg:flex w-[45%] gradient-brand flex-col items-center justify-center p-12 gap-8">
-        <Image src="/logo.png" alt="ISBEN Solution" width={200} height={200} className="object-contain drop-shadow-xl" />
+        <Image
+          src="/logo.png"
+          alt="ISBEN Solution"
+          width={200}
+          height={200}
+          className="object-contain drop-shadow-xl"
+        />
         <div className="text-white text-center">
           <h2 className="text-3xl font-extrabold">Bienvenido de vuelta</h2>
           <p className="mt-2 text-white/80 text-lg">
@@ -45,7 +88,11 @@ export default function PaginaLogin() {
           </p>
         </div>
         <div className="flex flex-col gap-3 w-full max-w-xs">
-          {["✓ Precios mayoristas verificados", "✓ Gestión de pedidos 24/7", "✓ Catálogo B2B + D2C"].map((item) => (
+          {[
+            "✓ Precios mayoristas verificados",
+            "✓ Gestión de pedidos 24/7",
+            "✓ Catálogo B2B + D2C",
+          ].map((item) => (
             <div key={item} className="flex items-center gap-2 text-white/90 text-sm">
               <span>{item}</span>
             </div>
@@ -53,12 +100,19 @@ export default function PaginaLogin() {
         </div>
       </div>
 
-      {/* Panel derecho — Formulario */}
+      {/* ── Panel derecho — Formulario ───────────────────────── */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 bg-white">
         <div className="w-full max-w-md">
+
           {/* Logo mobile */}
           <div className="lg:hidden flex justify-center mb-8">
-            <Image src="/logo.png" alt="ISBEN Solution" width={140} height={56} className="object-contain" />
+            <Image
+              src="/logo.png"
+              alt="ISBEN Solution"
+              width={140}
+              height={56}
+              className="object-contain"
+            />
           </div>
 
           <div className="mb-8">
@@ -72,22 +126,24 @@ export default function PaginaLogin() {
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-            {/* Email */}
+
+            {/* Usuario */}
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="login-email" className="text-sm font-semibold text-[#111]">
-                Correo electrónico
+              <label htmlFor="login-username" className="text-sm font-semibold text-[#111]">
+                Usuario
               </label>
               <input
-                id="login-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="empresa@ejemplo.com"
+                id="login-username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Tu nombre de usuario en Django"
                 required
-                autoComplete="email"
+                autoComplete="username"
+                disabled={cargando}
                 className="px-4 py-3 rounded-xl border border-[#E5E5E5] text-sm bg-[#F8F8F8]
                            focus:outline-none focus:border-[#FB4318] focus:ring-2 focus:ring-[#FB4318]/20
-                           placeholder:text-[#9CA3AF] transition-all"
+                           placeholder:text-[#9CA3AF] transition-all disabled:opacity-60"
               />
             </div>
 
@@ -105,9 +161,10 @@ export default function PaginaLogin() {
                   placeholder="••••••••"
                   required
                   autoComplete="current-password"
+                  disabled={cargando}
                   className="w-full px-4 py-3 pr-11 rounded-xl border border-[#E5E5E5] text-sm bg-[#F8F8F8]
                              focus:outline-none focus:border-[#FB4318] focus:ring-2 focus:ring-[#FB4318]/20
-                             placeholder:text-[#9CA3AF] transition-all"
+                             placeholder:text-[#9CA3AF] transition-all disabled:opacity-60"
                 />
                 <button
                   type="button"
@@ -120,18 +177,34 @@ export default function PaginaLogin() {
               </div>
             </div>
 
-            {/* Error */}
+            {/* Error inline */}
             {error && (
-              <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
+              <div
+                role="alert"
+                className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 animate-fade-in"
+              >
                 <AlertCircle size={16} className="flex-shrink-0" />
                 {error}
               </div>
             )}
 
-            <Button type="submit" loading={cargando} fullWidth size="lg" className="mt-2">
-              <LogIn size={16} />
-              Iniciar Sesión
-            </Button>
+            {/* Submit */}
+            <button
+              id="login-submit-btn"
+              type="submit"
+              disabled={cargando}
+              className="mt-2 w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl
+                         gradient-brand text-white font-bold text-sm
+                         hover:opacity-90 active:scale-[0.98] transition-all
+                         disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none
+                         focus:ring-2 focus:ring-[#FB4318]/50"
+            >
+              {cargando
+                ? <><Loader2 size={16} className="animate-spin" /> Iniciando sesión...</>
+                : <><LogIn size={16} /> Iniciar Sesión</>
+              }
+            </button>
+
           </form>
 
           <p className="mt-6 text-center text-xs text-[#9CA3AF]">

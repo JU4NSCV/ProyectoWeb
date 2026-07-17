@@ -23,11 +23,19 @@ class CustomUser(AbstractUser):
     direccion_matriz = models.TextField(blank=True, null=True)
     telefono_contacto = models.CharField(max_length=20, blank=True, null=True)
 
+    # 2.5 Atributos de Suscripción (Nuevo)
+    plan_actual = models.CharField(
+        max_length=50, 
+        default='PRUEBA_GRATUITA', 
+        help_text="Plan activo del usuario"
+    )
+    fecha_fin_suscripcion = models.DateTimeField(null=True, blank=True)
+    
     # 3. Validaciones de Seguridad (LOPD / B2B)
     empresa_verificada = models.BooleanField(
         default=False,
         help_text="Indica si el admin ya revisó el RUC y aprobó a esta empresa"
     )
-
+    documento_verificacion = models.FileField(upload_to='documentos_fiscales/', blank=True, null=True, help_text="Sube RUC o Patente Comercial")
     def __str__(self):
         return f"{self.username} - {self.get_rol_display()}"

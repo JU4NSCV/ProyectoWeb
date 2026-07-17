@@ -1,15 +1,17 @@
 "use client";
 // ============================================================
 // components/Navbar.tsx — Barra de navegación persistente
-// Incluye: Logo, Buscador, Selector de Rol y Carrito
+// Incluye: Logo, Buscador, Selector de Rol, Auth y Carrito
+// ★ REAL AUTH: Conectado con authStore (JWT real)
 // ============================================================
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { Search, ShoppingCart, ChevronDown, User, Store, Eye, Menu, X } from "lucide-react";
+import { Search, ShoppingCart, ChevronDown, User, Store, Eye, Menu, X, LogOut, UserCircle2, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCarritoStore } from "@/store/carritoStore";
 import { useRolStore } from "@/store/rolStore";
+import { useAuthStore } from "@/store/authStore";
 import { Badge } from "@/components/ui/Badge";
 import type { RolUsuario } from "@/types";
 
@@ -44,6 +46,8 @@ interface NavbarProps {
 export function Navbar({ onBusqueda, busqueda = "" }: NavbarProps) {
   const { totalItems, toggleCarrito } = useCarritoStore();
   const { rol, setRol } = useRolStore();
+  // ★ REAL AUTH: estado global de autenticación
+  const { estaAutenticado, usuario, logout } = useAuthStore();
   const [rolOpen, setRolOpen]   = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -51,6 +55,14 @@ export function Navbar({ onBusqueda, busqueda = "" }: NavbarProps) {
 
   const count = totalItems();
   const rolActual = ROLES.find((r) => r.valor === rol)!;
+
+  const handleLogout = () => {
+    logout();
+    setRolOpen(false);
+    setMenuOpen(false);
+    // Redirigir al login tras cerrar sesión
+    window.location.href = "/auth/login";
+  };
 
   // Efecto de sombra al hacer scroll
   useEffect(() => {
@@ -186,24 +198,63 @@ export function Navbar({ onBusqueda, busqueda = "" }: NavbarProps) {
                   </button>
                 ))}
 
-                {/* Acciones de autenticación */}
-                <div className="border-t border-[#F1F1F1] mt-1 pt-1 px-3 pb-2 flex gap-2">
-                  <Link
-                    href="/auth/login"
-                    className="flex-1 text-center text-xs py-1.5 px-2 rounded-lg border border-[#E5E5E5]
-                               text-[#111] hover:bg-[#F1F1F1] transition-colors font-medium"
-                    onClick={() => setRolOpen(false)}
-                  >
-                    Iniciar sesión
-                  </Link>
-                  <Link
-                    href="/auth/registro"
-                    className="flex-1 text-center text-xs py-1.5 px-2 rounded-lg gradient-brand
-                               text-white font-semibold hover:opacity-90 transition-opacity"
-                    onClick={() => setRolOpen(false)}
-                  >
-                    Registrarse
-                  </Link>
+                {/* Acciones de autenticación — condicional según estado real */}
+                <div className="border-t border-[#F1F1F1] mt-1 pt-1 px-3 pb-2">
+                  {estaAutenticado && usuario ? (
+                    // ★ LOGUEADO: mostrar info del usuario, link al dashboard y botón de logout
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center gap-2 px-1 py-1">
+                        <UserCircle2 size={14} className="text-[#FB4318] flex-shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-[#111] truncate">
+                            {usuario.username}
+                          </p>
+                          {usuario.email && (
+                            <p className="text-[10px] text-[#9CA3AF] truncate">{usuario.email}</p>
+                          )}
+                        </div>
+                      </div>
+                      {/* Link al Dashboard */}
+                      <Link
+                        href="/dashboard/pedidos"
+                        onClick={() => setRolOpen(false)}
+                        className="flex items-center gap-1.5 text-xs py-1.5 px-2 rounded-lg
+                                   gradient-brand text-white font-semibold hover:opacity-90 transition-opacity"
+                      >
+                        <LayoutDashboard size={11} />
+                        Mi Dashboard
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center justify-center gap-1.5 text-xs py-1.5 px-2
+                                   rounded-lg border border-red-200 text-red-600 hover:bg-red-50
+                                   transition-colors font-medium"
+                      >
+                        <LogOut size={12} />
+                        Cerrar sesión
+                      </button>
+                    </div>
+                  ) : (
+                    // ★ NO LOGUEADO: botones de login/registro
+                    <div className="flex gap-2">
+                      <Link
+                        href="/auth/login"
+                        className="flex-1 text-center text-xs py-1.5 px-2 rounded-lg border border-[#E5E5E5]
+                                   text-[#111] hover:bg-[#F1F1F1] transition-colors font-medium"
+                        onClick={() => setRolOpen(false)}
+                      >
+                        Iniciar sesión
+                      </Link>
+                      <Link
+                        href="/auth/registro"
+                        className="flex-1 text-center text-xs py-1.5 px-2 rounded-lg gradient-brand
+                                   text-white font-semibold hover:opacity-90 transition-opacity"
+                        onClick={() => setRolOpen(false)}
+                      >
+                        Registrarse
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -281,13 +332,34 @@ export function Navbar({ onBusqueda, busqueda = "" }: NavbarProps) {
                   {r.etiqueta}
                 </button>
               ))}
-              <div className="border-t border-[#E5E5E5] mt-2 pt-2 flex gap-2">
-                <Link href="/auth/login" className="flex-1 text-center py-2 text-sm border border-[#E5E5E5] rounded-lg font-medium">
-                  Iniciar sesión
-                </Link>
-                <Link href="/auth/registro" className="flex-1 text-center py-2 text-sm gradient-brand text-white rounded-lg font-semibold">
-                  Registrarse
-                </Link>
+              <div className="border-t border-[#E5E5E5] mt-2 pt-2">
+                {estaAutenticado && usuario ? (
+                  // ★ MOBILE LOGUEADO
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 px-1 py-1">
+                      <UserCircle2 size={14} className="text-[#FB4318]" />
+                      <span className="text-sm font-semibold text-[#111]">{usuario.username}</span>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center justify-center gap-2 py-2 text-sm
+                                 border border-red-200 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
+                    >
+                      <LogOut size={14} />
+                      Cerrar sesión
+                    </button>
+                  </div>
+                ) : (
+                  // ★ MOBILE NO LOGUEADO
+                  <div className="flex gap-2">
+                    <Link href="/auth/login" className="flex-1 text-center py-2 text-sm border border-[#E5E5E5] rounded-lg font-medium">
+                      Iniciar sesión
+                    </Link>
+                    <Link href="/auth/registro" className="flex-1 text-center py-2 text-sm gradient-brand text-white rounded-lg font-semibold">
+                      Registrarse
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>

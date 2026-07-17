@@ -3,7 +3,7 @@
 // ============================================================
 
 /** Roles de usuario disponibles en la plataforma */
-export type RolUsuario = "visitante" | "consumidor" | "minorista";
+export type RolUsuario = "visitante" | "consumidor" | "minorista" | "mayorista" | "MINORISTA" | "MAYORISTA" | "CONSUMIDOR";
 
 /** Interfaz principal de un Producto del catálogo */
 export interface Producto {
@@ -55,7 +55,8 @@ export interface DetallePedidoPayload {
 
 /** Payload completo para POST /api/pedidos/ */
 export interface CrearPedidoPayload {
-  cliente: number;                 // ID del cliente (hardcodeado en MVP)
+  /** @deprecated El backend lo asigna automáticamente por el token JWT (REQ 1) */
+  cliente?: number;
   direccion_entrega_final: string;
   notas_pedido: string;
   detalles: DetallePedidoPayload[];
@@ -69,6 +70,60 @@ export interface PedidoRespuesta {
   total?: number;
   created_at: string;
 }
+
+// ──────────────────────────────────────────────────────────────
+// Pedidos — Modelo completo con detalles (para el Dashboard)
+// ──────────────────────────────────────────────────────────────
+
+/** Estados posibles de un pedido en el sistema B2B */
+export type EstadoPedido =
+  | "pendiente"
+  | "PENDIENTE"
+  | "en_preparacion"
+  | "EN_PREPARACION"
+  | "enviado"
+  | "ENVIADO"
+  | "entregado"
+  | "ENTREGADO"
+  | "cancelado"
+  | "CANCELADO"
+  | "DESPACHADO"
+  | "preparando"
+  | "PREPARANDO";
+
+/** Detalle de un producto dentro de un pedido (respuesta del API) */
+export interface DetallePedido {
+  id: number;
+  producto: number;               // ID del producto
+  producto_nombre?: string;       // Nombre desnormalizado (si el API lo incluye)
+  producto_sku?: string;          // SKU desnormalizado
+  cantidad: number;
+  precio_unitario_guardado: string; // Decimal como string "12.50"
+  subtotal?: string;              // Calculado por el backend
+}
+
+/** Pedido completo con detalles anidados (respuesta del API de lista/detalle) */
+export interface Pedido {
+  id: number;
+  numero_pedido?: string;
+  cliente: number;                // ID del cliente
+  cliente_username?: string;      // Username desnormalizado
+  estado: EstadoPedido;
+  direccion_entrega_final: string;
+  notas_pedido: string;
+  total?: string | number;
+  detalles: DetallePedido[];
+  created_at: string;
+  updated_at?: string;
+}
+
+/** Payload para PATCH /api/pedidos/{id}/ — actualizar estado */
+export interface PatchEstadoPedido {
+  estado: EstadoPedido;
+}
+
+/** Estados que un Mayorista puede asignar a sus ventas */
+export type EstadoVentaMayorista = "PREPARANDO" | "ENVIADO" | "ENTREGADO";
 
 // Alias de compatibilidad (usado en checkout legacy)
 export type CrearOrdenPayload = CrearPedidoPayload;
@@ -87,7 +142,7 @@ export interface ToastMessage {
   descripcion?: string;
 }
 
-/** Formulario de registro de empresa (Minorista/Mayorista) */
+/** Formulario de registro de empresa (Minorista, Mayorista o Consumidor Final) */
 export interface FormularioRegistroEmpresa {
   razon_social: string;
   ruc: string;
@@ -96,8 +151,10 @@ export interface FormularioRegistroEmpresa {
   password_confirm: string;
   direccion: string;
   telefono: string;
-  /** Rol que el usuario solicita: 'minorista' para tiendas */
-  rol_solicitado: "minorista" | "mayorista";
+  /** Rol que el usuario solicita */
+  rol_solicitado: "minorista" | "mayorista" | "consumidor_final";
+  /** Documento de verificación RUC (solo Minorista/Mayorista) */
+  documento_verificacion?: File | null;
 }
 
 /** Respuesta paginada de la API */

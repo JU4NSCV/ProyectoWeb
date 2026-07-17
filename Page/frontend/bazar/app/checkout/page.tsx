@@ -1,35 +1,122 @@
 "use client";
 // ============================================================
 // app/checkout/page.tsx — Resumen y confirmación de Orden
+// ★ REAL AUTH: Usa user_id del JWT y Authorization header
 // ============================================================
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ShoppingCart, AlertTriangle, CheckCircle, ArrowLeft, Package } from "lucide-react";
+import {
+  ShoppingCart, AlertTriangle, CheckCircle, ArrowLeft,
+  Package, Loader2, Lock, AlertCircle,
+} from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { PanelCarrito } from "@/components/carrito/PanelCarrito";
 import { Button } from "@/components/ui/Button";
 import { useCarritoStore } from "@/store/carritoStore";
+import { useAuthStore } from "@/store/authStore";
+import { useToastStore } from "@/store/toastStore";
+import { crearPedido } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
 import Image from "next/image";
 
+// ── Tipos del formulario de entrega ──────────────────────────
+interface FormEntrega {
+  direccion: string;
+  notas: string;
+}
+
 export default function PaginaCheckout() {
   const router = useRouter();
-  const { items, subtotal, validaciones, carritoEsValido, vaciarCarrito, totalItems } = useCarritoStore();
+  const toast  = useToastStore();
 
-  // Redirigir si el carrito está vacío
+  // ★ REAL AUTH: extraer usuario y token del store JWT
+  const { usuario, accessToken, estaAutenticado } = useAuthStore();
+
+  const {
+    items, subtotal, validaciones, carritoEsValido, vaciarCarrito,
+    totalItems, checkoutEstado, setCheckoutEstado,
+  } = useCarritoStore();
+
+  const [form, setForm] = useState<FormEntrega>({ direccion: "", notas: "" });
+
+  // ── Guardia: redirigir si el carrito está vacío ──────────
   useEffect(() => {
     if (items.length === 0) router.push("/");
   }, [items.length, router]);
 
-  const esValido = carritoEsValido();
-  const validacionesMap = Object.fromEntries(validaciones().map((v) => [v.itemId, v]));
+  // ── Guardia: redirigir si no está autenticado ────────────
+  useEffect(() => {
+    if (!estaAutenticado) {
+      toast.advertencia(
+        "Debes iniciar sesión",
+        "Para confirmar un pedido necesitas estar autenticado."
+      );
+      router.push("/auth/login");
+    }
+  }, [estaAutenticado, router, toast]);
 
-  const handleConfirmar = () => {
-    // TODO: Integrar con POST /api/ordenes/
-    alert("✅ Orden de Compra generada. El proveedor la procesará en breve.");
-    vaciarCarrito();
-    router.push("/");
+  const esValido          = carritoEsValido();
+  const validacionesMap   = Object.fromEntries(validaciones().map((v) => [v.itemId, v]));
+  const estaCargando      = checkoutEstado === "loading";
+
+  // ── Handler principal de confirmación ────────────────────
+  const handleConfirmar = async () => {
+    // Validaciones previas
+    if (!esValido) {
+      toast.error("Carrito inválido", "Corrige las cantidades antes de confirmar.");
+      return;
+    }
+    if (!form.direccion.trim()) {
+      toast.advertencia("Dirección requerida", "Ingresa la dirección de entrega.");
+      return;
+    }
+    if (!usuario) {
+      toast.error("Sin sesión", "Debes iniciar sesión para confirmar el pedido.");
+      router.push("/auth/login");
+      return;
+    }
+
+    setCheckoutEstado("loading");
+
+    try {
+      // ★ FIX REQ 1: Payload SIN "cliente" — el backend lo asigna automáticamente por el token JWT
+      const payload = {
+        direccion_entrega_final: form.direccion.trim(),
+        notas_pedido:            form.notas.trim(),
+        detalles: items.map((item) => ({
+          producto:                  item.producto.id,
+          cantidad:                  item.cantidad,
+          precio_unitario_guardado:  item.precio_unitario.toFixed(2),
+        })),
+      };
+
+      // ★ REAL: Inyección del header Authorization: Bearer <token>
+      const pedido = await crearPedido(payload, accessToken ?? undefined);
+
+      setCheckoutEstado("exito", undefined);
+      vaciarCarrito();
+
+      toast.exito(
+        `¡Pedido #${pedido.id} creado!`,
+        "Tu orden fue enviada al proveedor. Recibirás confirmación en breve."
+      );
+
+      router.push("/");
+
+    } catch (err) {
+      const msg =
+        err instanceof Error && err.message.includes("401")
+          ? "Sesión expirada. Por favor, vuelve a iniciar sesión."
+          : "No se pudo crear el pedido. Intenta de nuevo.";
+
+      setCheckoutEstado("error", msg);
+      toast.error("Error al confirmar pedido", msg);
+
+      if (msg.includes("Sesión expirada")) {
+        router.push("/auth/login");
+      }
+    }
   };
 
   if (items.length === 0) return null;
@@ -40,6 +127,7 @@ export default function PaginaCheckout() {
       <PanelCarrito />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 flex flex-col gap-6">
+
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-[#6B6B6B]">
           <Link href="/" className="hover:text-[#FB4318] transition-colors flex items-center gap-1">
@@ -54,6 +142,18 @@ export default function PaginaCheckout() {
           <ShoppingCart size={24} className="text-[#FB4318]" />
           Confirmar Orden de Compra
         </h1>
+
+        {/* ★ Banner de autenticación */}
+        {estaAutenticado && usuario && (
+          <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-2xl px-4 py-3">
+            <Lock size={14} className="text-green-600 flex-shrink-0" />
+            <p className="text-sm text-green-800">
+              Pedido vinculado a{" "}
+              <span className="font-bold">{usuario.username}</span>
+              {" "}(ID: {usuario.id})
+            </p>
+          </div>
+        )}
 
         {/* Banner de validación global */}
         <div className={`flex items-start gap-3 p-4 rounded-2xl border ${
@@ -147,23 +247,81 @@ export default function PaginaCheckout() {
           </div>
         </div>
 
-        {/* CTA */}
+        {/* ★ Formulario de entrega */}
+        <div className="bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden">
+          <div className="px-5 py-3 border-b border-[#E5E5E5] bg-[#F8F8F8]">
+            <h2 className="font-bold text-[#111] text-sm">Datos de entrega</h2>
+          </div>
+          <div className="p-5 flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="checkout-direccion" className="text-sm font-semibold text-[#111]">
+                Dirección de entrega <span className="text-[#FB4318]">*</span>
+              </label>
+              <input
+                id="checkout-direccion"
+                type="text"
+                value={form.direccion}
+                onChange={(e) => setForm((f) => ({ ...f, direccion: e.target.value }))}
+                placeholder="Av. Principal 123, Ciudad, País"
+                disabled={estaCargando}
+                className="px-4 py-3 rounded-xl border border-[#E5E5E5] text-sm bg-[#F8F8F8]
+                           focus:outline-none focus:border-[#FB4318] focus:ring-2 focus:ring-[#FB4318]/20
+                           placeholder:text-[#9CA3AF] transition-all disabled:opacity-60"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="checkout-notas" className="text-sm font-semibold text-[#111]">
+                Notas del pedido <span className="text-[#9CA3AF] font-normal">(opcional)</span>
+              </label>
+              <textarea
+                id="checkout-notas"
+                value={form.notas}
+                onChange={(e) => setForm((f) => ({ ...f, notas: e.target.value }))}
+                rows={3}
+                placeholder="Instrucciones especiales, horarios de recepción, etc."
+                disabled={estaCargando}
+                className="px-4 py-3 rounded-xl border border-[#E5E5E5] text-sm bg-[#F8F8F8] resize-none
+                           focus:outline-none focus:border-[#FB4318] focus:ring-2 focus:ring-[#FB4318]/20
+                           placeholder:text-[#9CA3AF] transition-all disabled:opacity-60"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Error de checkout */}
+        {checkoutEstado === "error" && (
+          <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
+            <AlertCircle size={16} className="flex-shrink-0" />
+            Ocurrió un error al procesar tu pedido. Intenta de nuevo.
+          </div>
+        )}
+
+        {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-3">
           <Link href="/" className="flex-shrink-0">
-            <Button variant="ghost" size="lg">
+            <Button variant="ghost" size="lg" disabled={estaCargando}>
               <ArrowLeft size={16} />
               Seguir comprando
             </Button>
           </Link>
-          <Button
+
+          <button
+            id="checkout-confirmar-btn"
             onClick={handleConfirmar}
-            variant="primary"
-            size="lg"
-            fullWidth
-            disabled={!esValido}
+            disabled={!esValido || estaCargando || !form.direccion.trim()}
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl
+                       gradient-brand text-white font-bold text-sm
+                       hover:opacity-90 active:scale-[0.98] transition-all
+                       disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none
+                       focus:ring-2 focus:ring-[#FB4318]/50"
           >
-            {esValido ? "✓ Confirmar Orden de Compra" : "⚠ Corrige las cantidades primero"}
-          </Button>
+            {estaCargando
+              ? <><Loader2 size={16} className="animate-spin" /> Enviando pedido...</>
+              : esValido
+                ? "✓ Confirmar Orden de Compra"
+                : "⚠ Corrige las cantidades primero"
+            }
+          </button>
         </div>
       </main>
     </>

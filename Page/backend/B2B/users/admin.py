@@ -13,7 +13,7 @@ class CustomUserAdmin(UserAdmin):
     # Esto divide el formulario en secciones elegantes (fieldsets)
     fieldsets = UserAdmin.fieldsets + (
         ('Información Comercial B2B', {
-            'fields': ('rol', 'ruc', 'razon_social', 'direccion_matriz', 'telefono_contacto', 'empresa_verificada'),
+            'fields': ('rol', 'ruc', 'razon_social', 'direccion_matriz', 'telefono_contacto', 'empresa_verificada', 'documento_verificacion'),
         }),
     )
 

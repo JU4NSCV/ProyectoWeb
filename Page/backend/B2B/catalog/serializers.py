@@ -7,13 +7,11 @@ class CategoriaSerializer(serializers.ModelSerializer):
         fields = ['id', 'nombre', 'slug', 'descripcion']
 
 class ProductoSerializer(serializers.ModelSerializer):
-    # Agregamos este campo extra de solo lectura para que Next.js reciba el nombre de la categoría y no solo un ID numérico
     categoria_nombre = serializers.ReadOnlyField(source='categoria.nombre')
     proveedor_nombre = serializers.ReadOnlyField(source='proveedor.username')
-
+    
     class Meta:
         model = Producto
-        # Exponemos todos los campos importantes para el Módulo de Escaparate y Transacción
         fields = [
             'id', 'sku', 'nombre', 'descripcion', 'imagen',
             'categoria', 'categoria_nombre',
@@ -21,3 +19,5 @@ class ProductoSerializer(serializers.ModelSerializer):
             'precio_publico', 'precio_minorista',
             'moq', 'multiplo_lote', 'stock_disponible', 'activo'
         ]
+        # Hacemos que proveedor sea de solo lectura
+        read_only_fields = ['proveedor']

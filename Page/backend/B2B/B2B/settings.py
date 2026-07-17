@@ -142,3 +142,17 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 # Permitir que el Frontend (localhost:3000) consuma nuestra API
 CORS_ALLOW_ALL_ORIGINS = True  # Ojo: En producción cambiaremos esto solo al dominio oficial
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+}
+
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1), # El token expira en 1 día
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
