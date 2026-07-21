@@ -73,7 +73,8 @@ class RegistroForm(UserCreationForm):
         widget=forms.Select(attrs={
             'class': 'w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white '
                      'focus:outline-none focus:ring-2 focus:ring-[#FFC22F] '
-                     'focus:border-transparent transition-all cursor-pointer',
+                     'focus:border-transparent transition-all cursor-pointer '
+                     '[&>option]:text-slate-900 [&>option]:bg-white',
         })
     )
 

@@ -5,6 +5,16 @@
 
 {% block main_class %}py-16{% endblock %}
 
+{% block extra_head %}
+<style>
+  /* Soluciona el problema de texto blanco sobre fondo blanco en el selector del tipo de cuenta */
+  select option {
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="w-full max-w-2xl mx-auto px-4 animate-slide-up">
 
