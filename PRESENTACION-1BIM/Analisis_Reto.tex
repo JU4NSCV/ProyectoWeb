@@ -60,7 +60,7 @@ El análisis del sistema B2B se estructura en una cadena de valor de cuatro paso
 \section{Requisitos no funcionales}
 \begin{itemize}
     \item \textbf{Rendimiento y SEO:} El Frontend debe implementar Renderizado del Lado del Servidor (SSR) obligatorio para el posicionamiento en motores de búsqueda (SEO).
-    \item \textbf{Seguridad:} Se utilizarán JSON Web Tokens (JWT) para la comunicación segura entre cliente y servidor. Las reglas comerciales (como el MOQ) deben validarse de manera estricta en el Backend.
+    \item \textbf{Seguridad:} Se utilizarán sesiones nativas de Django para la autenticación segura entre cliente y servidor. Las reglas comerciales (como el MOQ) deben validarse de manera estricta en el Backend.
     \item \textbf{Mantenibilidad:} El sistema utilizará una arquitectura desacoplada para facilitar escalabilidad y futuras actualizaciones.
 \end{itemize}
 
@@ -277,7 +277,7 @@ graph TD
 
     subgraph Backend [Capa Backend - Django REST]
         API[API Gateway / Enrutador URLs]
-        Security[Servicio Autenticación JWT]
+        Security[Servicio Autenticación Sesiones]
         ProductSVC[Controlador de Catálogo y Reglas]
         OrderSVC[Controlador de Transacciones]
         ORM[Django ORM - Capa de Datos]

@@ -98,8 +98,7 @@ DATABASES = {
     'default': dj_database_url.config(
         # CONFIGURACIÓN LOCAL (Docker Compose): 
         # Apunta a la instancia de PostgreSQL levantada mediante tu archivo docker-compose.yml
-        # Usa el puerto 5434 mapeado en tu localhost.
-        default='postgres://bazar_admin:bazar_password@localhost:5434/bazar_db',
+        default=os.getenv('DATABASE_URL', 'postgres://bazar_admin:bazar_password@db:5432/bazar_db'),
         
         # CONFIGURACIÓN PRODUCCIÓN (Ej. Render, AWS):
         # Al subir a producción, la plataforma inyectará la variable de entorno 'DATABASE_URL'.
@@ -181,8 +180,5 @@ SESSION_SAVE_EVERY_REQUEST = False
 # CONFIGURACIÓN PRODUCCIÓN: Cambiar a False y configurar CORS_ALLOWED_ORIGINS con los dominios permitidos.
 CORS_ALLOW_ALL_ORIGINS = True
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-    ),
-}
+# Se ha eliminado cualquier bloque relacionado a REST_FRAMEWORK para evitar confusiones con JWT.
+# Django REST Framework utilizará sus valores por defecto (como SessionAuthentication).

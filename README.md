@@ -36,7 +36,7 @@ Para garantizar la agilidad, evitar el *Scope Creep* (expansión descontrolada) 
 * **Frontend (Interfaz):** Next.js (React) aprovechando el Renderizado del Lado del Servidor (SSR), lo cual es obligatorio para que el catálogo se posicione en Google (SEO).
 * **Estilos y Componentes:** Tailwind CSS junto con componentes prefabricados minimalistas de Shadcn UI y Lucide-react para acelerar la construcción de interfaces.
 * **Manejo de Estado:** Context API o Zustand para gestionar reactivamente el carrito y las sesiones de usuario en tiempo real.
-* **Backend y Base de Datos:** Supabase (PostgreSQL), un Backend como Servicio (BaaS) que resuelve la arquitectura relacional y la autenticación basada en roles (RBAC) con tokens JWT.
+* **Backend y Base de Datos:** Django (Python) con PostgreSQL alojado localmente mediante Docker Compose, manejando la arquitectura relacional y la autenticación basada en roles (RBAC) mediante sesiones nativas de Django.
 * **Despliegue:** Vercel / Replit, proporcionando despliegues automáticos ideales para entornos Next.js.
 
 ## 💰 Modelo de Mantenibilidad
