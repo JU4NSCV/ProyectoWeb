@@ -1,11 +1,3 @@
-"""
-URLs principales del proyecto B2B.
-
-Arquitectura Monolítica (MVT):
-  - Las rutas raíz (/) → Vistas Django con Templates (core.urls)
-  - Las rutas /api/  → API REST (se mantiene para integraciones futuras)
-  - Las rutas /admin/ → Panel de administración Django
-"""
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -24,13 +16,7 @@ urlpatterns = [
     # ADMIN DJANGO
     # ------------------------------------------------------------------
     path('admin/', admin.site.urls),
-
-    # ------------------------------------------------------------------
-    # RUTAS WEB MVT — Sistema de autenticación + Templates
-    # Estas rutas reemplazan el frontend Next.js
-    # ------------------------------------------------------------------
     path('', include('core.urls')),
-
     # ------------------------------------------------------------------
     # API REST (se mantiene para integraciones externas / apps móviles)
     # ------------------------------------------------------------------
