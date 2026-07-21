@@ -97,8 +97,8 @@ WSGI_APPLICATION = 'B2B.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(
         # CONFIGURACIÓN LOCAL (Docker Compose): 
-        # Apunta a la instancia de PostgreSQL levantada mediante tu archivo docker-compose.yml
-        default=os.getenv('DATABASE_URL', 'postgres://bazar_admin:bazar_password@db:5432/bazar_db'),
+        # Apunta a la instancia de PostgreSQL levantada mediante tu archivo docker-compose.yml, usando localhost y el puerto expuesto
+        default=os.getenv('DATABASE_URL', 'postgres://bazar_admin:bazar_password@localhost:5434/bazar_db'),
         
         # CONFIGURACIÓN PRODUCCIÓN (Ej. Render, AWS):
         # Al subir a producción, la plataforma inyectará la variable de entorno 'DATABASE_URL'.
