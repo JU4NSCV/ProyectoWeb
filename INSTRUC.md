@@ -23,59 +23,14 @@ git clone <URL_DEL_REPOSITORIO>
 cd ProyectoWeb
 ```
 
----
-
-## 🐋 Método A: Ejecución Rápida con Docker (Recomendado)
-
-Este método levantará automáticamente la base de datos PostgreSQL y el servidor Backend en Django utilizando contenedores de Docker. No necesitas configurar entornos virtuales de Python.
-
-### 1. Iniciar el Proyecto con Docker Compose
-
-Navega a la carpeta `Page/backend` y levanta los contenedores en segundo plano:
-
-```bash
-cd Page/backend
-docker compose up -d --build
-```
-
-Este comando descargará/construirá las imágenes necesarias para el Backend, preparará la base de datos y expondrá los servicios localmente.
-
-- ⚙️ **Catálogo Web y Backend (Django)**: [http://localhost:8000](http://localhost:8000)
-- ⚙️ **Panel de Administración**: [http://localhost:8000/admin](http://localhost:8000/admin)
-
-### 2. Configuración Inicial de la Base de Datos
-
-La primera vez que levantes los contenedores en una computadora nueva, asegúrate de aplicar las migraciones de Django para crear las tablas en la base de datos:
-
-```bash
-# Estando dentro de Page/backend
-docker exec -it bazar_web python manage.py migrate
-```
-
-Si deseas acceder al panel de administración de Django (`/admin`), puedes crear un superusuario con el siguiente comando:
-
-```bash
-docker exec -it bazar_web python manage.py createsuperuser
-```
-
-### 3. Detener el Proyecto
-
-Para detener el proyecto y apagar los contenedores, ejecuta:
-
-```bash
-# Estando dentro de Page/backend
-docker compose down
-```
-
----
-
-## 💻 Método B: Ejecución Local Independiente (Desarrollo Tradicional)
+## 💻 Método A: Ejecución Local Independiente (Desarrollo Tradicional)
 
 Si prefieres ejecutar el servidor Django directamente localmente en tu sistema operativo, usando Docker únicamente para la base de datos:
 
 ### 1. Levantar la Base de Datos (PostgreSQL)
 
 Navega a la carpeta del backend y levanta solo la base de datos:
+
 ```bash
 cd Page/backend
 docker compose up -d db
@@ -99,7 +54,7 @@ docker compose up -d db
    ```bash
    pip install -r requirements.txt
    ```
-5. *(Opcional)* Crea tu archivo de configuración `.env` en la carpeta `Page/backend/B2B/` si deseas sobrescribir variables de entorno. El proyecto intentará conectarse por defecto a `localhost:5434` (o `db:5432` si estás dentro del contenedor).
+5. _(Opcional)_ Crea tu archivo de configuración `.env` en la carpeta `Page/backend/B2B/` si deseas sobrescribir variables de entorno. El proyecto intentará conectarse por defecto a `localhost:5434` (o `db:5432` si estás dentro del contenedor).
    Ejemplo de contenido para el `.env`:
    ```env
    DATABASE_URL=postgres://bazar_admin:bazar_password@localhost:5434/bazar_db
@@ -124,5 +79,6 @@ docker compose up -d db
 ## 🔒 Notas de Seguridad
 
 Este proyecto ha sido configurado para ser seguro en desarrollo local:
+
 1. Las credenciales de base de datos de desarrollo y las llaves secretas en `settings.py` se pueden sobrescribir mediante variables de entorno o utilizando un archivo `.env`.
 2. Los entornos virtuales (`venv/`) y los archivos `.env` se encuentran ignorados por `.gitignore` para prevenir exposición accidental en repositorios públicos.
