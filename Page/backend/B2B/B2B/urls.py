@@ -33,7 +33,6 @@ urlpatterns = [
 
     # ------------------------------------------------------------------
     # API REST (se mantiene para integraciones externas / apps móviles)
-    # JWT ya no se usa para la web, solo para clientes API externos.
     # ------------------------------------------------------------------
     path('api/', include('catalog.urls')),
     path('api/', include('orders.urls')),

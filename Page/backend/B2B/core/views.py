@@ -1,6 +1,5 @@
 """
 Vistas MVT principales del sistema B2B — Bazar B2B / ISBEN Solution.
-Reemplaza DRF + JWT por django.contrib.auth (Session Authentication).
 
 Vistas incluidas:
   Auth:

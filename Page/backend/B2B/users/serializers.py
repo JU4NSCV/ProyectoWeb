@@ -1,15 +1,5 @@
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from .models import CustomUser
-
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-        # Añadimos datos personalizados al token seguro
-        token['rol'] = user.rol
-        token['empresa_verificada'] = user.empresa_verificada
-        return token
 
 class PerfilSerializer(serializers.ModelSerializer):
     class Meta:

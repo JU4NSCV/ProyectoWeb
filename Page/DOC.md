@@ -10,7 +10,7 @@ El desarrollo fue llevado a cabo utilizando **Python** como lenguaje principal y
 - **Base de Datos:** PostgreSQL, gestionada y conectada de forma segura a través de `dj-database-url` y `psycopg2-binary`.
 - **Manejo de Archivos Estáticos:** Integración con `whitenoise` para optimizar, comprimir y servir archivos de forma eficiente en un entorno de producción.
 - **Servidor y Despliegue:** Configuración lista para entornos productivos con `gunicorn` y orquestación a través de contenedores mediante `Docker` y `docker-compose`. Las credenciales se gestionan vía variables de entorno (`python-dotenv`).
-- **Autenticación y APIs:** Se emplea autenticación basada en sesiones de Django (encriptadas en BD), además de contar con dependencias instaladas (Django Rest Framework y SimpleJWT) preparadas para futuras integraciones y consumo por clientes externos.
+- **Autenticación y APIs:** Se emplea autenticación basada en sesiones de Django (encriptadas en BD), además de contar con dependencias instaladas (Django Rest Framework) preparadas para futuras integraciones y consumo por clientes externos.
 
 ## 3. ¿Con qué fin?
 El objetivo principal de esta arquitectura es proveer un núcleo de negocio escalable, seguro e inteligente, capaz de:

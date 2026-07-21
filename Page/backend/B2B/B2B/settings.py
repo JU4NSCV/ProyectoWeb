@@ -25,8 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure--ix!$=7edqo+o(gq*4ig1*ef=*h^d1ptko5pt*1yhzcxkb+7z!')
 
-DEBUG = False
-# Añade el dominio que te dé la plataforma de despliegue y localhost
+# CONFIGURACIÓN LOCAL: En desarrollo esto debe ser True para ver los errores.
+# CONFIGURACIÓN PRODUCCIÓN: Cambiar a False (o usar os.getenv('DEBUG', 'False') == 'True')
+DEBUG = True
+
+# CONFIGURACIÓN LOCAL: Permite cualquier host ('*') en desarrollo.
+# CONFIGURACIÓN PRODUCCIÓN: Añade el dominio real que te dé la plataforma (ej. ['tu-app.onrender.com'])
 ALLOWED_HOSTS = ['*']
 
 # Application definition
@@ -92,7 +96,15 @@ WSGI_APPLICATION = 'B2B.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgres://usuario:password@localhost:5432/bazar_db',
+        # CONFIGURACIÓN LOCAL (Docker Compose): 
+        # Apunta a la instancia de PostgreSQL levantada mediante tu archivo docker-compose.yml
+        # Usa el puerto 5434 mapeado en tu localhost.
+        default='postgres://bazar_admin:bazar_password@localhost:5434/bazar_db',
+        
+        # CONFIGURACIÓN PRODUCCIÓN (Ej. Render, AWS):
+        # Al subir a producción, la plataforma inyectará la variable de entorno 'DATABASE_URL'.
+        # dj_database_url leerá esa variable y reemplazará automáticamente esta conexión local
+        # por la de producción, sin que tengas que tocar este código.
         conn_max_age=600
     )
 }
@@ -165,18 +177,12 @@ SESSION_SAVE_EVERY_REQUEST = False
 # API REST (se mantiene para endpoints de integración futura)
 # -----------------------------------------------------------------------
 # Permite peticiones desde herramientas de testing o apps móviles
-CORS_ALLOW_ALL_ORIGINS = True  # Cambiar al dominio real en producción
+# CONFIGURACIÓN LOCAL: True permite que cualquier origen consuma la API (ideal en local).
+# CONFIGURACIÓN PRODUCCIÓN: Cambiar a False y configurar CORS_ALLOWED_ORIGINS con los dominios permitidos.
+CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
     ),
-}
-
-# JWT se mantiene disponible para integraciones de API externas
-from datetime import timedelta
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'AUTH_HEADER_TYPES': ('Bearer',),
 }

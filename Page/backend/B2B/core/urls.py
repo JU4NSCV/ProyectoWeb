@@ -1,6 +1,5 @@
 """
 URLs del sistema MVT B2B — Bazar B2B / ISBEN Solution.
-Reemplaza las rutas de API JWT por rutas web con templates.
 """
 from django.urls import path
 from core import views
@@ -13,7 +12,7 @@ urlpatterns = [
     path('', views.HomeView.as_view(), name='home'),
 
     # ------------------------------------------------------------------
-    # AUTENTICACIÓN (Session-based, sin JWT)
+    # AUTENTICACIÓN (Session-based)
     # ------------------------------------------------------------------
     path('login/', views.LoginView.as_view(), name='login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
