@@ -50,13 +50,19 @@ body {
 
 /* Gradientes corporativos */
 .brand-gradient {
-    background: linear-gradient(135deg, #FB4318 0%, #e03b14 100%);
+    background: linear-gradient(135deg, #FB4318 0%, #e03b14 100%) !important;
 }
 .gold-gradient {
-    background: linear-gradient(135deg, #FFC22F 0%, #f59e0b 100%);
+    background: linear-gradient(135deg, #FFC22F 0%, #f59e0b 100%) !important;
 }
 .hero-gradient {
-    background: linear-gradient(135deg, #1a0a00 0%, #3d1200 40%, #7d2010 100%);
+    background: linear-gradient(135deg, #1a0a00 0%, #3d1200 40%, #7d2010 100%) !important;
+}
+.brand-gold-gradient {
+    background: linear-gradient(135deg, #FB4318, #FFC22F) !important;
+}
+.brand-light-bg {
+    background: linear-gradient(135deg, rgba(251,67,24,0.1), rgba(255,194,47,0.1)), #fff3ef !important;
 }
 
 /* Navbar link activo */
@@ -181,3 +187,57 @@ tbody tr:nth-child(5) { animation-delay: 0.20s; }
     mask-composite: exclude;
     pointer-events: none;
 }
+
+/* --------------------------------------------------------------------------
+   4. Clases de Utilidad de Colores y Estilos para Eliminar Estilos Inline
+   -------------------------------------------------------------------------- */
+.text-brand {
+    color: #FB4318 !important;
+}
+.text-gold {
+    color: #FFC22F !important;
+}
+.bg-brand {
+    background-color: #FB4318 !important;
+}
+.bg-gold {
+    background-color: #FFC22F !important;
+}
+.bg-success {
+    background-color: #22c55e !important;
+}
+.border-brand {
+    border-color: #FB4318 !important;
+}
+.border-slate-200 {
+    border-color: #e2e8f0 !important;
+}
+.pl-7 {
+    padding-left: 1.75rem !important;
+}
+
+/* Clases estáticas para delays de animación (bucle counter) */
+.delay-000 { animation-delay: 0ms !important; }
+.delay-100 { animation-delay: 100ms !important; }
+.delay-200 { animation-delay: 200ms !important; }
+.delay-300 { animation-delay: 300ms !important; }
+.delay-400 { animation-delay: 400ms !important; }
+.delay-500 { animation-delay: 500ms !important; }
+.delay-600 { animation-delay: 600ms !important; }
+.delay-700 { animation-delay: 700ms !important; }
+.delay-800 { animation-delay: 800ms !important; }
+.delay-900 { animation-delay: 900ms !important; }
+
+/* Adiciones para eliminar estilos inline */
+.bg-brand-10 { background-color: rgba(251, 67, 24, 0.1) !important; }
+.bg-brand-5 { background-color: rgba(251, 67, 24, 0.05) !important; }
+.bg-brand-7 { background-color: rgba(251, 67, 24, 0.07) !important; }
+.bg-brand-8 { background-color: rgba(251, 67, 24, 0.08) !important; }
+.bg-brand-70 { background-color: rgba(251, 67, 24, 0.7) !important; }
+.bg-gold-12 { background-color: rgba(255, 194, 47, 0.12) !important; }
+.bg-gold-15 { background-color: rgba(255, 194, 47, 0.15) !important; }
+.text-brand-40 { color: rgba(251, 67, 24, 0.4) !important; }
+.text-gold-60 { color: rgba(255, 194, 47, 0.6) !important; }
+.text-brand-dark { color: #e03b14 !important; }
+.border-brand-30 { border-color: rgba(251, 67, 24, 0.3) !important; }
+.text-amber-600 { color: #d97706 !important; }

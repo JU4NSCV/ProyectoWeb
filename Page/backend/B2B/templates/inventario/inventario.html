@@ -12,8 +12,7 @@
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
     <div>
       <div class="flex items-center gap-3 mb-1">
-        <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#FB4318]/30"
-             style="background: linear-gradient(135deg, #FB4318, #e03b14);">
+        <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#FB4318]/30 brand-gradient">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
@@ -21,15 +20,14 @@
         <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Mi Inventario</h1>
       </div>
       <p class="text-slate-500">
-        🏭 <span class="font-semibold" style="color: #FB4318;">{{ user.razon_social|default:user.username }}</span>
+        🏭 <span class="font-semibold text-brand">{{ user.razon_social|default:user.username }}</span>
         — Gestiona y publica tus productos en el catálogo B2B.
       </p>
     </div>
 
     <!-- Botón Nuevo Producto -->
     <button id="btn-abrir-modal"
-            class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-white font-bold text-sm shadow-lg shadow-[#FB4318]/30 hover:-translate-y-0.5 transition-all duration-200"
-            style="background: linear-gradient(135deg, #FB4318, #e03b14);">
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-white font-bold text-sm shadow-lg shadow-[#FB4318]/30 hover:-translate-y-0.5 transition-all duration-200 brand-gradient">
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
       </svg>
@@ -44,8 +42,7 @@
 
     <!-- Total productos -->
     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4 hover:shadow-md hover:border-[#FB4318]/20 transition-all group">
-      <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-md shadow-[#FB4318]/20 group-hover:scale-105 transition-transform"
-           style="background: linear-gradient(135deg, #FB4318, #e03b14);">
+      <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-md shadow-[#FB4318]/20 group-hover:scale-105 transition-transform brand-gradient">
         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
         </svg>
@@ -58,8 +55,7 @@
 
     <!-- Plan actual -->
     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-all group">
-      <div class="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform"
-           style="background: linear-gradient(135deg, #FFC22F, #f59e0b);">
+      <div class="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform gold-gradient">
         <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
         </svg>
@@ -70,7 +66,7 @@
         <p class="text-xs text-slate-500 font-medium">{{ total_productos }}/{{ suscripcion.plan.limite_productos }} SKUs usados</p>
         {% else %}
         <p class="text-base font-black text-slate-900">Sin plan</p>
-        <p class="text-xs text-slate-500 font-medium"><a href="{% url 'suscripciones' %}" class="underline" style="color: #FB4318;">Ver planes disponibles →</a></p>
+        <p class="text-xs text-slate-500 font-medium"><a href="{% url 'suscripciones' %}" class="underline text-brand">Ver planes disponibles →</a></p>
         {% endif %}
       </div>
     </div>
@@ -81,9 +77,8 @@
       <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Capacidad del Plan</p>
       {% widthratio total_productos suscripcion.plan.limite_productos 100 as pct_uso %}
       <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mb-2">
-        <div class="h-full rounded-full transition-all duration-500"
-             style="width: {{ pct_uso }}%;
-                    background: {% if pct_uso|add:'0' >= 80 %}#FB4318{% elif pct_uso|add:'0' >= 50 %}#FFC22F{% else %}#22c55e{% endif %};">
+        <div class="h-full rounded-full transition-all duration-500 {% if pct_uso|add:'0' >= 80 %}bg-brand{% elif pct_uso|add:'0' >= 50 %}bg-gold{% else %}bg-success{% endif %}"
+             style="width: {{ pct_uso }}%;">
         </div>
       </div>
       <p class="text-xs text-slate-400">
@@ -98,8 +93,7 @@
     {% else %}
     <div class="bg-gradient-to-br from-[#FFC22F]/10 to-[#FB4318]/10 rounded-2xl border border-[#FFC22F]/30 p-5 flex items-center justify-center">
       <a href="{% url 'suscripciones' %}"
-         class="text-sm font-bold px-4 py-2 rounded-xl text-white shadow-md transition-all hover:-translate-y-0.5"
-         style="background: linear-gradient(135deg, #FFC22F, #f59e0b); color: #1a0a00;">
+         class="text-sm font-bold px-4 py-2 rounded-xl text-slate-950 shadow-md transition-all hover:-translate-y-0.5 gold-gradient">
         ⭐ Activar Suscripción
       </a>
     </div>
@@ -117,8 +111,7 @@
         <p class="text-sm text-slate-500 mt-0.5">Inventario activo en el catálogo de Bazar B2B</p>
       </div>
       <!-- Badge de total -->
-      <span class="px-3 py-1 rounded-full text-xs font-bold text-white"
-            style="background: #FB4318;">
+      <span class="px-3 py-1 rounded-full text-xs font-bold text-white bg-brand">
         {{ total_productos }} producto{{ total_productos|pluralize:"s" }}
       </span>
     </div>
@@ -172,8 +165,7 @@
 
             <!-- Categoría -->
             <td class="px-6 py-4">
-              <span class="px-2.5 py-1 rounded-lg text-xs font-semibold text-white"
-                    style="background: #FB4318;">
+              <span class="px-2.5 py-1 rounded-lg text-xs font-semibold text-white bg-brand">
                 {{ p.categoria.nombre }}
               </span>
             </td>
@@ -249,8 +241,7 @@
       {% else %}
       <!-- Estado vacío -->
       <div class="text-center py-20 animate-fade-in">
-        <div class="w-24 h-24 mx-auto mb-6 rounded-3xl flex items-center justify-center shadow-xl shadow-[#FB4318]/10"
-             style="background: linear-gradient(135deg, #FB4318/10, #FFC22F/10); background: #fff3ef;">
+        <div class="w-24 h-24 mx-auto mb-6 rounded-3xl flex items-center justify-center shadow-xl shadow-[#FB4318]/10 brand-light-bg">
           <svg class="w-12 h-12 text-[#FB4318]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
@@ -260,8 +251,7 @@
           Publica tu primer producto y empieza a recibir pedidos de minoristas en todo el país.
         </p>
         <button id="btn-abrir-modal-2"
-                class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-white font-bold shadow-xl hover:-translate-y-1 transition-all duration-200"
-                style="background: linear-gradient(135deg, #FB4318, #e03b14);">
+                class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-white font-bold shadow-xl hover:-translate-y-1 transition-all duration-200 brand-gradient">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
@@ -290,8 +280,7 @@
   <div class="relative w-full max-w-3xl max-h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-slide-up">
 
     <!-- Header del modal -->
-    <div class="flex items-center justify-between px-7 py-5 border-b border-slate-100"
-         style="background: linear-gradient(135deg, #FB4318, #e03b14);">
+    <div class="flex items-center justify-between px-7 py-5 border-b border-slate-100 brand-gradient">
       <div class="flex items-center gap-3">
         <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -329,8 +318,7 @@
         <!-- ── Sección 1: Información Básica ─────────────────────── -->
         <div>
           <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs font-black"
-                  style="background: #FB4318;">1</span>
+            <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs font-black bg-brand">1</span>
             Información Básica
           </h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -372,8 +360,7 @@
         <!-- ── Sección 2: Precios ─────────────────────────────────── -->
         <div>
           <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs font-black"
-                  style="background: #FB4318;">2</span>
+            <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs font-black bg-brand">2</span>
             Motor de Precios B2B
           </h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -384,7 +371,7 @@
               </label>
               <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">$</span>
-                <div style="padding-left: 1.75rem;">{{ form.precio_publico }}</div>
+                <div class="pl-7">{{ form.precio_publico }}</div>
               </div>
               <p class="mt-1 text-xs text-slate-400">Visible para visitantes y consumidores.</p>
               {% if form.precio_publico.errors %}<p class="mt-1 text-xs text-red-500">{{ form.precio_publico.errors.0 }}</p>{% endif %}
@@ -396,7 +383,7 @@
               </label>
               <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 font-bold text-sm">$</span>
-                <div style="padding-left: 1.75rem;">{{ form.precio_minorista }}</div>
+                <div class="pl-7">{{ form.precio_minorista }}</div>
               </div>
               <p class="mt-1 text-xs text-slate-400">Exclusivo para Minoristas verificados.</p>
               {% if form.precio_minorista.errors %}<p class="mt-1 text-xs text-red-500">{{ form.precio_minorista.errors.0 }}</p>{% endif %}
@@ -407,8 +394,7 @@
         <!-- ── Sección 3: Reglas B2B ──────────────────────────────── -->
         <div>
           <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs font-black"
-                  style="background: #FFC22F; color: #1a0a00;">3</span>
+            <span class="w-6 h-6 rounded-lg flex items-center justify-center text-slate-950 text-xs font-black bg-gold">3</span>
             Reglas de Venta B2B (MOQ y Lotes)
           </h3>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -453,8 +439,7 @@
         <!-- ── Sección 4: Imagen y Estado ───────────────────────── -->
         <div>
           <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs font-black"
-                  style="background: #FB4318;">4</span>
+            <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs font-black bg-brand">4</span>
             Imagen y Visibilidad
           </h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -491,8 +476,7 @@
       <button type="submit"
               form="form-producto"
               id="btn-guardar-producto"
-              class="flex items-center gap-2 px-8 py-2.5 rounded-xl text-white text-sm font-bold shadow-lg shadow-[#FB4318]/30 hover:-translate-y-0.5 transition-all duration-200"
-              style="background: linear-gradient(135deg, #FB4318, #e03b14);">
+              class="flex items-center gap-2 px-8 py-2.5 rounded-xl text-white text-sm font-bold shadow-lg shadow-[#FB4318]/30 hover:-translate-y-0.5 transition-all duration-200 brand-gradient">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>

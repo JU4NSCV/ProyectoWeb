@@ -11,14 +11,13 @@
   ============================================================ -->
   <div class="text-center mb-12">
     <!-- Badge exclusivo -->
-    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-6 border"
-         style="background: linear-gradient(135deg, #FFC22F20, #FB431820); border-color: #FFC22F50; color: #d97706;">
-      <span class="w-2 h-2 rounded-full animate-pulse" style="background: #FFC22F;"></span>
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-6 border brand-light-bg border-gold/50 text-amber-600">
+      <span class="w-2 h-2 rounded-full animate-pulse bg-gold"></span>
       🏭 Zona Exclusiva para Mayoristas — ISBEN Solution
     </div>
     <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">
-      Elige tu <span style="color: #FB4318;">Plan</span>
-      <span style="color: #FFC22F;">de Suscripción</span>
+      Elige tu <span class="text-brand">Plan</span>
+      <span class="text-gold">de Suscripción</span>
     </h1>
     <p class="text-lg text-slate-500 max-w-2xl mx-auto">
       Publica tu catálogo, gestiona pedidos y llega a minoristas en todo el país.
@@ -32,7 +31,7 @@
       <div class="text-left">
         <p class="text-sm font-bold text-slate-800">
           Plan actual:
-          <span style="color: #FB4318;">{{ suscripcion_actual.plan.nombre_plan }}</span>
+          <span class="text-brand">{{ suscripcion_actual.plan.nombre_plan }}</span>
         </p>
         <p class="text-xs text-slate-500">
           {% if suscripcion_actual.estado == 'ACTIVA' %}
@@ -58,9 +57,7 @@
            id="card-plan-{{ plan.id }}">
 
         <!-- Badge destacado -->
-        {% if plan.destacado %}
-        <div class="absolute top-0 left-0 right-0 py-2 text-center text-xs font-black text-white tracking-widest uppercase"
-             style="background: linear-gradient(135deg, #FB4318, #FFC22F);">
+        <div class="absolute top-0 left-0 right-0 py-2 text-center text-xs font-black text-white tracking-widest uppercase brand-gold-gradient">
           ⭐ Más Popular
         </div>
         {% endif %}
@@ -76,7 +73,7 @@
 
           <!-- Precio -->
           <div class="flex items-end gap-1 mb-6">
-            <span class="text-5xl font-black" style="color: {% if plan.destacado %}#FB4318{% else %}#1e293b{% endif %};">
+            <span class="text-5xl font-black {% if plan.destacado %}text-brand{% else %}text-slate-800{% endif %}">
               ${{ plan.precio_mensual }}
             </span>
             <span class="text-slate-400 font-medium mb-2">/mes</span>
@@ -85,29 +82,24 @@
           <!-- Features -->
           <ul class="space-y-3 mb-8">
             <li class="flex items-start gap-2.5 text-sm text-slate-600">
-              <span class="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs"
-                    style="background: #22c55e;">✓</span>
+              <span class="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs bg-success">✓</span>
               Portal de mayorista activo
             </li>
             <li class="flex items-start gap-2.5 text-sm text-slate-600">
-              <span class="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs"
-                    style="background: #22c55e;">✓</span>
+              <span class="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs bg-success">✓</span>
               Configuración de MOQ y lotes
             </li>
             <li class="flex items-start gap-2.5 text-sm text-slate-600">
-              <span class="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs"
-                    style="background: #22c55e;">✓</span>
+              <span class="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs bg-success">✓</span>
               Gestión de pedidos entrantes
             </li>
             <li class="flex items-start gap-2.5 text-sm text-slate-600">
-              <span class="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs"
-                    style="background: #22c55e;">✓</span>
+              <span class="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs bg-success">✓</span>
               <strong>{{ plan.limite_productos }} SKUs</strong>&nbsp;publicados simultáneamente
             </li>
             {% if plan.destacado %}
             <li class="flex items-start gap-2.5 text-sm text-slate-600">
-              <span class="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs"
-                    style="background: #FFC22F; color: #1a0a00;">★</span>
+              <span class="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs bg-gold text-slate-950">★</span>
               Posicionamiento prioritario en catálogo
             </li>
             {% endif %}
@@ -115,15 +107,10 @@
 
           <!-- CTA: Seleccionar plan -->
           <button type="button"
-                  class="seleccionar-plan w-full py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 hover:-translate-y-0.5"
+                  class="seleccionar-plan w-full py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 hover:-translate-y-0.5 {% if plan.destacado %}brand-gradient text-white shadow-lg shadow-brand/35{% else %}bg-slate-50 text-slate-800 border-2 border-slate-200{% endif %}"
                   data-plan-id="{{ plan.id }}"
                   data-plan-nombre="{{ plan.nombre_plan }}"
-                  data-plan-precio="{{ plan.precio_mensual }}"
-                  {% if plan.destacado %}
-                  style="background: linear-gradient(135deg, #FB4318, #e03b14); color: white; box-shadow: 0 8px 20px rgba(251,67,24,0.35);"
-                  {% else %}
-                  style="background: #f8fafc; color: #1e293b; border: 2px solid #e2e8f0;"
-                  {% endif %}>
+                  data-plan-precio="{{ plan.precio_mensual }}">
             {% if suscripcion_actual and suscripcion_actual.plan == plan %}
               ✓ Plan Activo
             {% else %}
@@ -156,14 +143,12 @@
       </div>
 
       <!-- Plan Básico (destacado) -->
-      <div class="relative bg-white rounded-3xl shadow-xl border-2 border-[#FB4318] ring-4 ring-[#FB4318]/10 p-8 scale-[1.02] hover:-translate-y-2 transition-all duration-300">
-        <div class="absolute top-0 inset-x-0 py-2 text-center text-xs font-black text-white tracking-widest rounded-t-3xl"
-             style="background: linear-gradient(135deg, #FB4318, #FFC22F);">⭐ Más Popular</div>
+        <div class="absolute top-0 inset-x-0 py-2 text-center text-xs font-black text-white tracking-widest rounded-t-3xl brand-gold-gradient">⭐ Más Popular</div>
         <div class="pt-6">
           <h2 class="text-2xl font-extrabold text-slate-900 mb-1">Plan Básico</h2>
           <p class="text-sm text-slate-500 mb-5">Hasta 150 productos publicados</p>
           <div class="flex items-end gap-1 mb-6">
-            <span class="text-5xl font-black" style="color: #FB4318;">$39</span>
+            <span class="text-5xl font-black text-brand">$39</span>
             <span class="text-slate-400 mb-2">/mes</span>
           </div>
           <ul class="space-y-3 mb-8 text-sm text-slate-600">
@@ -172,9 +157,8 @@
             <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Reglas MOQ y Lotes</li>
             <li class="flex items-center gap-2"><span class="text-emerald-500">✓</span> Soporte por email</li>
           </ul>
-          <button type="button" class="seleccionar-plan w-full py-3.5 rounded-2xl font-bold text-sm text-white transition-all hover:-translate-y-0.5"
-                  data-plan-id="2" data-plan-nombre="Plan Básico" data-plan-precio="39.00"
-                  style="background: linear-gradient(135deg, #FB4318, #e03b14); box-shadow: 0 8px 20px rgba(251,67,24,0.35);">
+          <button type="button" class="seleccionar-plan w-full py-3.5 rounded-2xl font-bold text-sm text-white transition-all hover:-translate-y-0.5 brand-gradient shadow-lg shadow-brand/35"
+                  data-plan-id="2" data-plan-nombre="Plan Básico" data-plan-precio="39.00">
             Seleccionar Plan →
           </button>
         </div>
@@ -218,12 +202,10 @@
       </div>
 
       <!-- Plan seleccionado (resumen) -->
-      <div id="resumen-plan"
-           class="p-5 rounded-2xl border-2 flex items-center justify-between mb-8 bg-white shadow-sm"
-           style="border-color: #FB4318;">
+           class="p-5 rounded-2xl border-2 flex items-center justify-between mb-8 bg-white shadow-sm border-brand">
         <div>
           <p class="text-sm text-slate-500 font-medium">Plan seleccionado</p>
-          <p id="nombre-plan-seleccionado" class="text-xl font-extrabold" style="color: #FB4318;"></p>
+          <p id="nombre-plan-seleccionado" class="text-xl font-extrabold text-brand"></p>
         </div>
         <div class="text-right">
           <p class="text-sm text-slate-500 font-medium">Costo mensual</p>
@@ -234,24 +216,21 @@
       <!-- Opciones de método de pago -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
         <button type="button"
-                class="metodo-pago-btn p-4 rounded-2xl border-2 text-left transition-all duration-200 hover:border-[#FB4318]"
-                style="border-color: #e2e8f0;"
+                class="metodo-pago-btn p-4 rounded-2xl border-2 text-left transition-all duration-200 hover:border-brand border-slate-200"
                 data-metodo="transferencia">
           <div class="text-2xl mb-1">🏦</div>
           <p class="font-bold text-slate-800 text-sm">Transferencia Bancaria</p>
           <p class="text-xs text-slate-500 mt-0.5">QR + datos de cuenta</p>
         </button>
         <button type="button"
-                class="metodo-pago-btn p-4 rounded-2xl border-2 text-left transition-all duration-200 hover:border-[#FB4318]"
-                style="border-color: #e2e8f0;"
+                class="metodo-pago-btn p-4 rounded-2xl border-2 text-left transition-all duration-200 hover:border-brand border-slate-200"
                 data-metodo="tarjeta">
           <div class="text-2xl mb-1">💳</div>
           <p class="font-bold text-slate-800 text-sm">Tarjeta de Crédito</p>
           <p class="text-xs text-slate-500 mt-0.5">Próximamente</p>
         </button>
         <button type="button"
-                class="metodo-pago-btn p-4 rounded-2xl border-2 text-left transition-all duration-200 hover:border-[#FB4318]"
-                style="border-color: #e2e8f0;"
+                class="metodo-pago-btn p-4 rounded-2xl border-2 text-left transition-all duration-200 hover:border-brand border-slate-200"
                 data-metodo="efectivo">
           <div class="text-2xl mb-1">💵</div>
           <p class="font-bold text-slate-800 text-sm">Pago en Efectivo</p>
@@ -264,8 +243,7 @@
         <div class="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden">
 
           <!-- Header del bloque -->
-          <div class="px-7 py-5 border-b border-slate-100"
-               style="background: linear-gradient(135deg, #1a0a00, #3d1200);">
+          <div class="px-7 py-5 border-b border-slate-100 hero-gradient">
             <h3 class="text-lg font-extrabold text-white flex items-center gap-3">
               <span class="w-8 h-8 rounded-xl bg-[#FB4318] flex items-center justify-center">🏦</span>
               Transferencia Bancaria — Datos de Pago
@@ -391,10 +369,7 @@
         <input type="hidden" name="plan_id" id="input-plan-id" />
         <input type="hidden" name="metodo_pago" id="input-metodo-pago" value="transferencia" />
 
-        <button type="submit"
-                id="btn-simular-pago"
-                class="w-full flex items-center justify-center gap-3 py-5 px-8 rounded-3xl text-white font-black text-lg shadow-2xl hover:-translate-y-1 transition-all duration-200"
-                style="background: linear-gradient(135deg, #FB4318 0%, #FFC22F 100%);">
+                class="w-full flex items-center justify-center gap-3 py-5 px-8 rounded-3xl text-white font-black text-lg shadow-2xl hover:-translate-y-1 transition-all duration-200 brand-gold-gradient">
           <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>

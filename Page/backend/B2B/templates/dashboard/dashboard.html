@@ -14,12 +14,12 @@
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
     <div>
       <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
-        ¡Hola, <span style="color:#FB4318;">{{ user.first_name|default:user.username }}</span>! 👋
+        ¡Hola, <span class="text-brand">{{ user.first_name|default:user.username }}</span>! 👋
       </h1>
       <p class="mt-1.5 text-slate-500 text-sm">
         Dashboard Logístico —
         {% if user.rol == 'MAYORISTA' %}
-          <span class="font-semibold" style="color:#FB4318;">🏭 Mayorista / Proveedor</span>
+          <span class="font-semibold text-brand">🏭 Mayorista / Proveedor</span>
         {% elif user.rol == 'MINORISTA' %}
           <span class="font-semibold text-emerald-600">🏪 Tienda Minorista B2B</span>
         {% elif user.rol == 'CONSUMIDOR' %}
@@ -54,8 +54,8 @@
     <div class="kpi-card bg-white rounded-2xl shadow-sm border border-slate-100 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all group">
       <div class="flex items-center justify-between mb-3">
         <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Mis Compras</span>
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform" style="background:rgba(251,67,24,0.1);">
-          <svg class="w-5 h-5" style="color:#FB4318;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform bg-brand-10">
+          <svg class="w-5 h-5 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
           </svg>
         </div>
@@ -97,17 +97,17 @@
     <div class="kpi-card bg-white rounded-2xl shadow-sm border border-slate-100 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all group">
       <div class="flex items-center justify-between mb-3">
         <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Mis Ventas</span>
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform" style="background:rgba(255,194,47,0.15);">
-          <svg class="w-5 h-5" style="color:#d97706;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <div class="w-9 h-9 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform bg-gold-15">
+          <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
         </div>
       </div>
-      <p class="text-3xl font-extrabold" style="color:#d97706;">{{ total_ventas|default:"0" }}</p>
+      <p class="text-3xl font-extrabold text-amber-600">{{ total_ventas|default:"0" }}</p>
       <p class="text-xs text-slate-400 mt-1">
         órdenes recibidas
         {% if ventas_pendientes_count %}
-          <span class="ml-1 px-1.5 py-0.5 rounded-full text-white text-[10px] font-bold" style="background:#FB4318;">{{ ventas_pendientes_count }} activas</span>
+          <span class="ml-1 px-1.5 py-0.5 rounded-full text-white text-[10px] font-bold bg-brand">{{ ventas_pendientes_count }} activas</span>
         {% endif %}
       </p>
     </div>
@@ -157,12 +157,12 @@
       <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
         <div>
           <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <span class="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm" style="background:linear-gradient(135deg,#FB4318,#e03b14);">📋</span>
+            <span class="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm brand-gradient">📋</span>
             Historial de Mis Compras
           </h2>
           <p class="text-sm text-slate-400 mt-0.5 ml-10">Todas las órdenes que has realizado en la plataforma</p>
         </div>
-        <span class="px-3 py-1.5 rounded-xl text-xs font-bold border" style="color:#FB4318;border-color:rgba(251,67,24,0.3);background:rgba(251,67,24,0.05);">
+        <span class="px-3 py-1.5 rounded-xl text-xs font-bold border text-brand border-brand-30 bg-brand-5">
           {{ mis_compras.count }} orden(es)
         </span>
       </div>
@@ -186,7 +186,7 @@
             <tr class="hover:bg-slate-50/80 transition-colors">
               <!-- ID -->
               <td class="px-6 py-4">
-                <span class="font-extrabold text-lg" style="color:#FB4318;">#{{ pedido.id }}</span>
+                <span class="font-extrabold text-lg text-brand">#{{ pedido.id }}</span>
               </td>
 
               <!-- Fecha -->
@@ -213,8 +213,7 @@
                 <div class="space-y-0.5">
                   {% for detalle in pedido.detalles.all %}
                   <p class="text-xs text-slate-600">
-                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-md text-white text-[10px] font-bold mr-1"
-                          style="background:rgba(251,67,24,0.7);">{{ detalle.cantidad }}</span>
+                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-md text-white text-[10px] font-bold mr-1 bg-brand-70">{{ detalle.cantidad }}</span>
                     <span class="font-medium">{{ detalle.producto.nombre }}</span>
                     <span class="text-slate-400 ml-1">(×${{ detalle.precio_unitario_guardado }})</span>
                   </p>
@@ -259,8 +258,8 @@
         {% else %}
         <!-- Estado vacío -->
         <div class="text-center py-20 text-slate-400">
-          <div class="w-20 h-20 mx-auto mb-5 rounded-2xl flex items-center justify-center" style="background:rgba(251,67,24,0.07);">
-            <svg class="w-10 h-10" style="color:rgba(251,67,24,0.4);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <div class="w-20 h-20 mx-auto mb-5 rounded-2xl flex items-center justify-center bg-brand-7">
+            <svg class="w-10 h-10 text-brand-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
           </div>
@@ -285,14 +284,14 @@
       <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
         <div>
           <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <span class="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm" style="background:linear-gradient(135deg,#FFC22F,#f59e0b);">🚚</span>
+            <span class="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm gold-gradient">🚚</span>
             Ventas a Despachar
           </h2>
           <p class="text-sm text-slate-400 mt-0.5 ml-10">Gestiona y actualiza el estado de los pedidos de tus clientes</p>
         </div>
         <div class="flex items-center gap-3">
           {% if ventas_pendientes_count %}
-          <span class="px-3 py-1.5 rounded-xl text-xs font-bold text-white" style="background:linear-gradient(135deg,#FB4318,#e03b14);">
+          <span class="px-3 py-1.5 rounded-xl text-xs font-bold text-white brand-gradient">
             🔔 {{ ventas_pendientes_count }} activas
           </span>
           {% endif %}
@@ -322,7 +321,7 @@
 
               <!-- ID Pedido -->
               <td class="px-4 py-4">
-                <span class="font-extrabold text-lg" style="color:#FB4318;">#{{ venta.id }}</span>
+                <span class="font-extrabold text-lg text-brand">#{{ venta.id }}</span>
               </td>
 
               <!-- Fecha -->
@@ -335,7 +334,7 @@
               <td class="px-4 py-4">
                 <div class="flex items-center gap-2.5">
                   <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                       style="background:linear-gradient(135deg,#FB4318,#e03b14);">
+                       class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 brand-gradient">
                     {{ venta.cliente.username|first|upper }}
                   </div>
                   <div>
@@ -360,8 +359,8 @@
                 <button type="button"
                         id="toggle-{{ venta.id }}"
                         onclick="toggleProductos('{{ venta.id }}')"
-                        class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors"
-                        style="color:#FB4318;border-color:rgba(251,67,24,0.3);background:rgba(251,67,24,0.05);">
+                        class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors text-brand border-brand-30 bg-brand-5"
+                        >
                   <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
@@ -377,8 +376,7 @@
                     <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">📦 Lista de empaque</p>
                     {% for detalle in venta.detalles.all %}
                     <div class="flex items-center gap-2 text-xs text-slate-700">
-                      <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
-                            style="background:linear-gradient(135deg,#FB4318,#e03b14);">
+                      <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 brand-gradient">
                         {{ detalle.cantidad }}
                       </span>
                       <div class="flex-1 min-w-0">
@@ -437,8 +435,7 @@
                   <!-- Selector de nuevo estado -->
                   <select name="nuevo_estado"
                           id="estado-select-{{ venta.id }}"
-                          class="estado-select text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-700 font-medium focus:outline-none focus:ring-2 focus:border-transparent transition-all"
-                          style="--tw-ring-color:rgba(251,67,24,0.4);">
+                          class="estado-select text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-transparent transition-all">
                     {% for valor, etiqueta in estados_pedido %}
                       {% if valor != 'CANCELADO' %}
                       <option value="{{ valor }}"
@@ -453,8 +450,7 @@
                   <!-- Botón Actualizar -->
                   <button type="submit"
                           id="btn-actualizar-{{ venta.id }}"
-                          class="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-white text-xs font-bold transition-all hover:shadow-md active:scale-95"
-                          style="background:linear-gradient(135deg,#FB4318,#e03b14);">
+                          class="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-white text-xs font-bold transition-all hover:shadow-md active:scale-95 brand-gradient">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
@@ -477,8 +473,8 @@
         {% else %}
         <!-- Estado vacío -->
         <div class="text-center py-20 text-slate-400">
-          <div class="w-20 h-20 mx-auto mb-5 rounded-2xl flex items-center justify-center" style="background:rgba(255,194,47,0.12);">
-            <svg class="w-10 h-10" style="color:rgba(255,194,47,0.6);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <div class="w-20 h-20 mx-auto mb-5 rounded-2xl flex items-center justify-center bg-gold-12">
+            <svg class="w-10 h-10 text-gold-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
@@ -494,7 +490,7 @@
     <section class="mt-6 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
       <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
         <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-          <span class="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs" style="background:linear-gradient(135deg,#FB4318,#e03b14);">📦</span>
+          <span class="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs brand-gradient">📦</span>
           Mis Productos en el Catálogo
         </h2>
         <span class="text-xs text-slate-400 font-medium">{{ total_productos }} publicado(s)</span>
@@ -518,7 +514,7 @@
               <td class="px-5 py-3 font-semibold text-slate-800">{{ p.nombre }}</td>
               <td class="px-5 py-3 text-slate-500 font-mono text-xs">{{ p.sku|default:"—" }}</td>
               <td class="px-5 py-3">
-                <span class="px-2 py-0.5 rounded-md text-xs font-medium" style="background:rgba(251,67,24,0.08);color:#e03b14;">
+                <span class="px-2 py-0.5 rounded-md text-xs font-medium bg-brand-8 text-brand-dark">
                   {{ p.categoria.nombre }}
                 </span>
               </td>
@@ -580,14 +576,14 @@
             <td class="px-6 py-4 text-slate-700">{{ empresa.razon_social|default:"—" }}</td>
             <td class="px-6 py-4 font-mono text-slate-600 text-xs">{{ empresa.ruc|default:"—" }}</td>
             <td class="px-6 py-4">
-              <span class="px-2 py-0.5 rounded-md text-xs font-bold" style="background:rgba(251,67,24,0.08);color:#e03b14;">
+              <span class="px-2 py-0.5 rounded-md text-xs font-bold bg-brand-8 text-brand-dark">
                 {{ empresa.get_rol_display }}
               </span>
             </td>
             <td class="px-6 py-4">
               {% if empresa.documento_verificacion %}
                 <a href="{{ empresa.documento_verificacion.url }}" target="_blank"
-                   class="inline-flex items-center gap-1 text-xs font-medium transition-colors" style="color:#FB4318;">
+                   class="inline-flex items-center gap-1 text-xs font-medium transition-colors text-brand">
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
@@ -606,7 +602,7 @@
     <div class="px-6 py-4 bg-slate-50 border-t border-slate-100">
       <p class="text-xs text-slate-400">
         💡 Para verificar una empresa, usa el
-        <a href="/admin/users/customuser/" class="font-medium hover:underline" style="color:#FB4318;">Panel de Administración</a>
+        <a href="/admin/users/customuser/" class="font-medium hover:underline text-brand">Panel de Administración</a>
         o el API endpoint <code class="bg-slate-200 px-1 rounded">/api/admin/empresas/&lt;id&gt;/verificar_empresa/</code>
       </p>
     </div>

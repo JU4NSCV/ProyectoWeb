@@ -145,8 +145,12 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
 # Habilita la compresión y el almacenamiento en caché a largo plazo
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 # Media files (Imágenes de productos, documentos de verificación)
 MEDIA_URL = '/media/'

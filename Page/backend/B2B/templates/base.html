@@ -60,7 +60,7 @@
   </script>
 
   <!-- Estilos centralizados de Bazar B2B -->
-  <link rel="stylesheet" href="{% static 'css/custom.css' %}" />
+  <link rel="stylesheet" href="{% static 'custom.css' %}" />
 
   {% block extra_head %}{% endblock %}
 </head>
@@ -86,8 +86,8 @@
             <div class="w-full h-full brand-gradient hidden items-center justify-center text-white font-black text-sm">B</div>
           </div>
           <div class="flex flex-col leading-none">
-            <span class="text-base font-black tracking-tight" style="color: #FB4318;">BAZAR B2B</span>
-            <span class="text-[10px] font-semibold tracking-widest uppercase" style="color: #FFC22F;">by ISBEN Solution</span>
+            <span class="text-base font-black tracking-tight text-brand">BAZAR B2B</span>
+            <span class="text-[10px] font-semibold tracking-widest uppercase text-gold">by ISBEN Solution</span>
           </div>
         </a>
 
@@ -133,8 +133,7 @@
               <span class="hidden sm:inline">Carrito</span>
               {% if total_carrito and total_carrito > 0 %}
               <span id="carrito-badge"
-                    class="absolute -top-2 -right-2 w-5 h-5 rounded-full text-white text-xs font-bold flex items-center justify-center animate-pulse"
-                    style="background: #FB4318;">
+                    class="absolute -top-2 -right-2 w-5 h-5 rounded-full text-white text-xs font-bold flex items-center justify-center animate-pulse bg-brand">
                 {{ total_carrito }}
               </span>
               {% endif %}
@@ -144,8 +143,7 @@
             <div class="relative group">
               <button class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100 transition-all duration-200">
                 <!-- Avatar con inicial -->
-                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md"
-                     style="background: linear-gradient(135deg, #FB4318, #e03b14);">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md brand-gradient">
                   {{ user.username|first|upper }}
                 </div>
                 <div class="hidden md:block text-left">
@@ -285,8 +283,8 @@
                  onerror="this.style.display='none'; this.parentElement.style.background='#FB4318';" />
           </div>
           <div>
-            <p class="font-black text-sm" style="color: #FB4318;">BAZAR B2B</p>
-            <p class="text-xs font-semibold tracking-widest uppercase" style="color: #FFC22F;">ISBEN Solution</p>
+            <p class="font-black text-sm text-brand">BAZAR B2B</p>
+            <p class="text-xs font-semibold tracking-widest uppercase text-gold">ISBEN Solution</p>
           </div>
         </div>
         <p class="text-sm text-slate-400">© 2025 Bazar B2B — ISBEN Solution. Plataforma de distribución mayorista.</p>
