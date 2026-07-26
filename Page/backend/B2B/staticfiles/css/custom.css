@@ -1,0 +1,183 @@
+/* ==========================================================================
+   ESTILOS CENTRALIZADOS — BAZAR B2B / ISBEN Solution
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Estilos Globales y Base (de base.html)
+   -------------------------------------------------------------------------- */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Scrollbar con colores de marca */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #f8fafc;
+}
+::-webkit-scrollbar-thumb {
+    background: #FB4318;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #e03b14;
+}
+
+/* Animaciones globales */
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+.animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+}
+.animate-slide-in-right {
+    animation: slideInRight 0.35s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Gradientes corporativos */
+.brand-gradient {
+    background: linear-gradient(135deg, #FB4318 0%, #e03b14 100%);
+}
+.gold-gradient {
+    background: linear-gradient(135deg, #FFC22F 0%, #f59e0b 100%);
+}
+.hero-gradient {
+    background: linear-gradient(135deg, #1a0a00 0%, #3d1200 40%, #7d2010 100%);
+}
+
+/* Navbar link activo */
+.nav-active {
+    color: #FB4318;
+    border-bottom: 2px solid #FB4318;
+}
+
+/* Botones con marca */
+.btn-brand {
+    background: linear-gradient(135deg, #FB4318, #e03b14);
+    color: white;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.btn-brand:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(251, 67, 24, 0.35);
+}
+
+.btn-gold {
+    background: linear-gradient(135deg, #FFC22F, #f59e0b);
+    color: #1a0a00;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    transition: all 0.2s;
+}
+.btn-gold:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(255, 194, 47, 0.40);
+}
+
+/* --------------------------------------------------------------------------
+   2. Estilos del Formulario de Registro (de registro.html)
+   -------------------------------------------------------------------------- */
+/* Soluciona el problema de texto blanco sobre fondo blanco en el selector del tipo de cuenta */
+select option {
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. Estilos del Dashboard (de dashboard.html)
+   -------------------------------------------------------------------------- */
+/* Pestañas (Tabs) */
+.tab-btn {
+    transition: all 0.2s ease;
+}
+.tab-btn.active {
+    background: linear-gradient(135deg, #FB4318, #e03b14);
+    color: white;
+    box-shadow: 0 4px 15px rgba(251, 67, 24, 0.35);
+}
+.tab-panel {
+    display: none;
+}
+.tab-panel.active {
+    display: block;
+}
+
+/* Desplegable de productos en fila */
+.productos-collapse {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+}
+.productos-collapse.open {
+    max-height: 500px;
+}
+
+/* Badge de estado logístico */
+.estado-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+/* Select de cambio de estado en formulario */
+.estado-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 14px;
+    padding-right: 30px;
+}
+
+/* Animación de filas de tabla al cargar */
+tbody tr {
+    animation: fadeInRow 0.3s ease both;
+}
+@keyframes fadeInRow {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+tbody tr:nth-child(2) { animation-delay: 0.05s; }
+tbody tr:nth-child(3) { animation-delay: 0.10s; }
+tbody tr:nth-child(4) { animation-delay: 0.15s; }
+tbody tr:nth-child(5) { animation-delay: 0.20s; }
+
+/* KPI card con bordes degradados */
+.kpi-card {
+    position: relative;
+}
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 1rem;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(251, 67, 24, 0.2), transparent);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
