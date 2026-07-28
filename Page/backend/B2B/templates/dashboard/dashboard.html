@@ -179,6 +179,7 @@
               <th class="px-6 py-3 text-left font-semibold">Total</th>
               <th class="px-6 py-3 text-left font-semibold">Estado</th>
               <th class="px-6 py-3 text-left font-semibold">Dirección</th>
+              <th class="px-6 py-3 text-left font-semibold">Acciones</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-50">
@@ -248,6 +249,20 @@
                 <p class="truncate" title="{{ pedido.direccion_entrega_final }}">{{ pedido.direccion_entrega_final }}</p>
                 {% if pedido.notas_pedido %}
                 <p class="text-slate-400 mt-0.5 truncate italic" title="{{ pedido.notas_pedido }}">💬 {{ pedido.notas_pedido }}</p>
+                {% endif %}
+              </td>
+              
+              <!-- Acciones -->
+              <td class="px-6 py-4">
+                {% if pedido.estado == 'PENDIENTE' %}
+                <form method="POST" action="{% url 'actualizar_estado' %}" onsubmit="return confirm('¿Estás seguro de cancelar este pedido?');">
+                  {% csrf_token %}
+                  <input type="hidden" name="pedido_id" value="{{ pedido.id }}">
+                  <input type="hidden" name="nuevo_estado" value="CANCELADO">
+                  <button type="submit" class="text-xs font-bold px-3 py-1.5 rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition-colors">
+                    Cancelar
+                  </button>
+                </form>
                 {% endif %}
               </td>
             </tr>
@@ -437,13 +452,11 @@
                           id="estado-select-{{ venta.id }}"
                           class="estado-select text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-transparent transition-all">
                     {% for valor, etiqueta in estados_pedido %}
-                      {% if valor != 'CANCELADO' %}
                       <option value="{{ valor }}"
                               {% if valor == venta.estado %}selected{% endif %}>
-                        {% if valor == 'PENDIENTE' %}⏳{% elif valor == 'APROBADO' %}🔵{% elif valor == 'DESPACHADO' %}🚚{% elif valor == 'ENTREGADO' %}✅{% endif %}
+                        {% if valor == 'PENDIENTE' %}⏳{% elif valor == 'APROBADO' %}🔵{% elif valor == 'DESPACHADO' %}🚚{% elif valor == 'ENTREGADO' %}✅{% elif valor == 'CANCELADO' %}❌{% endif %}
                         {{ etiqueta }}
                       </option>
-                      {% endif %}
                     {% endfor %}
                   </select>
 

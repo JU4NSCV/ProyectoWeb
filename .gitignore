@@ -42,6 +42,10 @@ __pycache__/
 *.pyo
 *.pyd
 
+# Django generated static and media
+staticfiles/
+media/
+
 # environment files (sensitive credentials)
 .env
 .env.local

@@ -421,11 +421,6 @@ class ActualizarEstadoPedidoView(LoginRequiredMixin, View):
     def post(self, request):
         user = request.user
 
-        # ── Verificación de rol ───────────────────────────────────────────────
-        if user.rol != 'MAYORISTA' and not user.is_superuser:
-            messages.error(request, 'No tienes permisos para actualizar estados de pedidos.')
-            return redirect('dashboard')
-
         pedido_id = request.POST.get('pedido_id')
         nuevo_estado = request.POST.get('nuevo_estado')
 
@@ -439,17 +434,23 @@ class ActualizarEstadoPedidoView(LoginRequiredMixin, View):
         pedido = get_object_or_404(Pedido, id=pedido_id)
 
         # ── Verificación de propiedad (anti-IDOR) ─────────────────────────────
-        # El Mayorista solo puede actualizar pedidos donde tenga al menos un producto
-        es_dueno = pedido.detalles.filter(
-            producto__proveedor=user
-        ).exists()
+        es_dueno = pedido.detalles.filter(producto__proveedor=user).exists()
+        es_cliente = (pedido.cliente == user)
 
-        if not es_dueno and not user.is_superuser:
+        if not es_dueno and not es_cliente and not user.is_superuser:
             messages.error(
                 request,
-                f'No puedes actualizar el Pedido #{pedido.id}: no contiene tus productos.'
+                f'No puedes actualizar el Pedido #{pedido.id}: no tienes permisos.'
             )
             return redirect('dashboard')
+
+        if es_cliente and not es_dueno and not user.is_superuser:
+            if nuevo_estado != 'CANCELADO':
+                messages.error(request, 'Solo puedes cancelar tu pedido, no puedes cambiarlo a otro estado.')
+                return redirect('dashboard')
+            if pedido.estado != 'PENDIENTE':
+                messages.error(request, 'Solo puedes cancelar pedidos que estén pendientes de aprobación.')
+                return redirect('dashboard')
 
         # ── Actualizar estado ─────────────────────────────────────────────────
         estado_anterior = pedido.get_estado_display()
