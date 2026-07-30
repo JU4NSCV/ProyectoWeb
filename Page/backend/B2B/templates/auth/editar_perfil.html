@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Perfil{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 animate-fade-in">
+
+  <!-- ============================================================
+       CABECERA
+  ============================================================ -->
+  <div class="flex items-center gap-4 mb-8">
+    <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-[#FB4318]/30 brand-gradient">
+      <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+    </div>
+    <div>
+      <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Mi Perfil</h1>
+      <p class="text-slate-500 mt-1">Actualiza tu información personal y de contacto.</p>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FORMULARIO DE EDICIÓN
+  ============================================================ -->
+  <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+    <div class="px-7 py-6">
+      <form method="post" action="{% url 'editar_perfil' %}" class="space-y-6" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="p-4 bg-red-50 border border-red-200 rounded-2xl mb-6">
+          {% for error in form.non_field_errors %}
+          <p class="text-sm text-red-700 font-medium">❌ {{ error }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- ── Sección 1: Datos Personales ─────────────────────── -->
+        <div>
+          <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs font-black bg-brand">1</span>
+            Datos Personales
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">{{ form.first_name.label }}</label>
+              {{ form.first_name }}
+              {% if form.first_name.errors %}<p class="mt-1 text-xs text-red-500">{{ form.first_name.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+              <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">{{ form.last_name.label }}</label>
+              {{ form.last_name }}
+              {% if form.last_name.errors %}<p class="mt-1 text-xs text-red-500">{{ form.last_name.errors.0 }}</p>{% endif %}
+            </div>
+            <div class="sm:col-span-2">
+              <label for="{{ form.email.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">{{ form.email.label }}</label>
+              {{ form.email }}
+              {% if form.email.errors %}<p class="mt-1 text-xs text-red-500">{{ form.email.errors.0 }}</p>{% endif %}
+            </div>
+            <div class="sm:col-span-2">
+              <label for="{{ form.telefono_contacto.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">{{ form.telefono_contacto.label }}</label>
+              {{ form.telefono_contacto }}
+              {% if form.telefono_contacto.errors %}<p class="mt-1 text-xs text-red-500">{{ form.telefono_contacto.errors.0 }}</p>{% endif %}
+            </div>
+            <div class="sm:col-span-2">
+              <label for="{{ form.direccion_matriz.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">{{ form.direccion_matriz.label }}</label>
+              {{ form.direccion_matriz }}
+              {% if form.direccion_matriz.errors %}<p class="mt-1 text-xs text-red-500">{{ form.direccion_matriz.errors.0 }}</p>{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Sección 2: Datos de Empresa (Opcional) ────────────── -->
+        {% if user.rol != 'CONSUMIDOR' %}
+        <div class="pt-6 mt-6 border-t border-slate-100">
+          <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg flex items-center justify-center text-slate-950 text-xs font-black bg-gold">2</span>
+            Datos de Empresa
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="sm:col-span-2">
+              <label for="{{ form.razon_social.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">{{ form.razon_social.label }}</label>
+              {{ form.razon_social }}
+              {% if form.razon_social.errors %}<p class="mt-1 text-xs text-red-500">{{ form.razon_social.errors.0 }}</p>{% endif %}
+            </div>
+            <div class="sm:col-span-2">
+              <label for="{{ form.ruc.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-1.5">{{ form.ruc.label }}</label>
+              {{ form.ruc }}
+              {% if form.ruc.errors %}<p class="mt-1 text-xs text-red-500">{{ form.ruc.errors.0 }}</p>{% endif %}
+            </div>
+          </div>
+          {% if user.rol == 'MAYORISTA' or user.rol == 'MINORISTA' %}
+          <div class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2">
+            <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p class="text-xs text-amber-700">
+              <strong>Aviso:</strong> Como {{ user.get_rol_display }}, tu empresa {% if user.empresa_verificada %}<strong>ya está verificada</strong>{% else %}<strong>aún no está verificada</strong>{% endif %}.
+            </p>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="pt-6 mt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+          <a href="{% url 'dashboard' %}" class="px-6 py-2.5 rounded-xl border-2 border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-100 transition-colors">
+            Cancelar
+          </a>
+          <button type="submit" class="flex items-center gap-2 px-8 py-2.5 rounded-xl text-white text-sm font-bold shadow-lg shadow-[#FB4318]/30 hover:-translate-y-0.5 transition-all duration-200 brand-gradient">
+            Guardar Perfil
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

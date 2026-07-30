@@ -17,6 +17,7 @@ urlpatterns = [
     path('login/', views.LoginView.as_view(), name='login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
     path('registro/', views.RegistroView.as_view(), name='registro'),
+    path('perfil/editar/', views.EditarPerfilView.as_view(), name='editar_perfil'),
 
     # ------------------------------------------------------------------
     # CATÁLOGO
@@ -45,6 +46,8 @@ urlpatterns = [
     # MÓDULO 1: INVENTARIO (solo Mayoristas)
     # ------------------------------------------------------------------
     path('inventario/', views.InventarioMayoristaView.as_view(), name='inventario'),
+    path('inventario/producto/<int:pk>/editar/', views.EditarProductoMayoristaView.as_view(), name='editar_producto'),
+    path('inventario/producto/<int:pk>/toggle-estado/', views.ToggleEstadoProductoView.as_view(), name='toggle_estado_producto'),
 
     # ------------------------------------------------------------------
     # MÓDULO 3: ACTUALIZACIÓN DE ESTADO DE PEDIDO (Mayoristas)

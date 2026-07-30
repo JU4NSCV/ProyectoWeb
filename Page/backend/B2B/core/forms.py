@@ -107,6 +107,61 @@ class RegistroForm(UserCreationForm):
         return user
 
 
+class EditarPerfilForm(forms.ModelForm):
+    """
+    Formulario para editar el perfil del usuario.
+    Se adapta a cualquier rol, pero resalta los campos corporativos para B2B.
+    """
+    class Meta:
+        model = CustomUser
+        fields = [
+            'first_name', 'last_name', 'email', 
+            'telefono_contacto', 'direccion_matriz', 
+            'razon_social', 'ruc'
+        ]
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Clases de estilos genéricas (usadas también en ProductoForm)
+        input_classes = (
+            'w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 '
+            'placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FB4318] '
+            'focus:border-transparent transition-all text-sm'
+        )
+        textarea_classes = (
+            'w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 '
+            'placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FB4318] '
+            'focus:border-transparent resize-none transition-all text-sm'
+        )
+        
+        # Configuración de todos los widgets y labels
+        self.fields['first_name'].widget.attrs.update({'class': input_classes, 'placeholder': 'Ej: Juan'})
+        self.fields['first_name'].label = 'Nombres'
+        
+        self.fields['last_name'].widget.attrs.update({'class': input_classes, 'placeholder': 'Ej: Pérez'})
+        self.fields['last_name'].label = 'Apellidos'
+        
+        self.fields['email'].widget.attrs.update({'class': input_classes, 'placeholder': 'correo@ejemplo.com'})
+        self.fields['email'].label = 'Correo Electrónico'
+        
+        self.fields['telefono_contacto'].widget.attrs.update({'class': input_classes, 'placeholder': 'Ej: 0991234567'})
+        self.fields['telefono_contacto'].label = 'Teléfono de Contacto'
+        
+        self.fields['direccion_matriz'].widget.attrs = forms.Textarea(attrs={'class': textarea_classes, 'rows': 3, 'placeholder': 'Dirección completa...'}).attrs
+        self.fields['direccion_matriz'].label = 'Dirección'
+        
+        self.fields['razon_social'].widget.attrs.update({'class': input_classes, 'placeholder': 'Nombre de tu Empresa / Local'})
+        self.fields['razon_social'].label = 'Razón Social (Opcional)'
+        
+        self.fields['ruc'].widget.attrs.update({'class': input_classes, 'placeholder': 'Ej: 1790000000001'})
+        self.fields['ruc'].label = 'RUC (Opcional)'
+        
+        # Eliminar campos de empresa si el usuario es Consumidor Final
+        if self.instance and self.instance.rol == 'CONSUMIDOR':
+            self.fields.pop('razon_social', None)
+            self.fields.pop('ruc', None)
+
+
 # ==========================================================================
 # FORM DE CARRITO (existente, sin cambios)
 # ==========================================================================

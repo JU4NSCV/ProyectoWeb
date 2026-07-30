@@ -48,6 +48,7 @@ from core.forms import (
     AgregarAlCarritoForm,
     CheckoutForm,
     ProductoForm,
+    EditarPerfilForm,
 )
 
 
@@ -149,6 +150,30 @@ class RegistroView(View):
                 'Recibirás acceso completo una vez que el administrador verifique tu empresa.'
             )
             return redirect('login')
+        return render(request, self.template_name, {'form': form})
+
+
+class EditarPerfilView(LoginRequiredMixin, View):
+    """
+    Vista para que cualquier usuario autenticado (Mayorista, Minorista, Consumidor)
+    pueda editar su información de perfil.
+    """
+    template_name = 'auth/editar_perfil.html'
+    login_url = 'login'
+    
+    def get(self, request):
+        form = EditarPerfilForm(instance=request.user)
+        return render(request, self.template_name, {'form': form})
+        
+    def post(self, request):
+        form = EditarPerfilForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '✅ ¡Tu perfil ha sido actualizado con éxito!')
+            # Podría redirigirse al dashboard o a la misma página
+            return redirect('editar_perfil')
+            
+        messages.error(request, '❌ Hubo un error al actualizar tu perfil. Revisa los campos marcados.')
         return render(request, self.template_name, {'form': form})
 
 
@@ -617,6 +642,53 @@ class InventarioMayoristaView(MayoristaRequiredMixin, View):
         return getattr(request.user, 'suscripcion_activa', None)
 
 
+class EditarProductoMayoristaView(MayoristaRequiredMixin, View):
+    """
+    Vista protegida para editar un producto existente.
+    Verifica que el producto pertenezca al mayorista logueado.
+    """
+    template_name = 'inventario/editar_producto.html'
+
+    def get(self, request, pk):
+        producto = get_object_or_404(Producto, id=pk, proveedor=request.user)
+        form = ProductoForm(instance=producto)
+        return render(request, self.template_name, {'form': form, 'producto': producto})
+
+    def post(self, request, pk):
+        producto = get_object_or_404(Producto, id=pk, proveedor=request.user)
+        form = ProductoForm(request.POST, request.FILES, instance=producto)
+        
+        if form.is_valid():
+            form.save()
+            messages.success(
+                request,
+                f'✅ ¡Producto "{producto.nombre}" actualizado con éxito!'
+            )
+            return redirect('inventario')
+            
+        messages.error(request, '❌ Hay errores en el formulario.')
+        return render(request, self.template_name, {'form': form, 'producto': producto})
+
+
+class ToggleEstadoProductoView(MayoristaRequiredMixin, View):
+    """
+    Endpoint POST para activar/desactivar un producto del catálogo.
+    Verifica que el producto pertenezca al mayorista logueado.
+    """
+    def post(self, request, pk):
+        producto = get_object_or_404(Producto, id=pk, proveedor=request.user)
+        # Invertir el estado
+        producto.activo = not producto.activo
+        producto.save(update_fields=['activo'])
+        
+        estado = "activado" if producto.activo else "desactivado"
+        messages.success(
+            request, 
+            f'✅ Producto "{producto.sku}" {estado} correctamente.'
+        )
+        return redirect('inventario')
+
+
 # ============================================================================
 # MÓDULO 2: SUSCRIPCIONES Y PASARELA DE PAGO (Solo Mayoristas)
 # ============================================================================
@@ -630,6 +702,13 @@ class SuscripcionesView(MayoristaRequiredMixin, View):
     template_name = 'suscripciones/suscripciones.html'
 
     def get(self, request):
+        if not request.user.empresa_verificada and not request.user.is_superuser:
+            messages.warning(
+                request, 
+                'Tu empresa aún está en proceso de verificación. No puedes adquirir una suscripción hasta ser aprobado.'
+            )
+            return redirect('dashboard')
+
         planes = PlanSuscripcion.objects.all().order_by('precio_mensual')
         suscripcion_actual = getattr(request.user, 'suscripcion_activa', None)
 
@@ -660,6 +739,10 @@ class ActivarSuscripcionView(MayoristaRequiredMixin, View):
     """
 
     def post(self, request):
+        if not request.user.empresa_verificada and not request.user.is_superuser:
+            messages.error(request, 'Acción denegada: Tu empresa aún no ha sido verificada.')
+            return redirect('dashboard')
+
         plan_id = request.POST.get('plan_id')
         metodo_pago = request.POST.get('metodo_pago', 'transferencia')
 
