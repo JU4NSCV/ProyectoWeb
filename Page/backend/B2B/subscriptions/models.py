@@ -1,6 +1,23 @@
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
-from datetime import date
+from datetime import date, timedelta
+import uuid
+
+class SuscripcionManager(models.Manager):
+    def activar_suscripcion(self, usuario, plan):
+        with transaction.atomic():
+            transaccion_id = f'SIM-{uuid.uuid4().hex[:12].upper()}'
+            suscripcion, creada = self.update_or_create(
+                usuario=usuario,
+                defaults={
+                    'plan': plan,
+                    'fecha_fin': date.today() + timedelta(days=30),
+                    'estado': self.model.Estados.ACTIVA,
+                    'transaccion_pasarela_id': transaccion_id,
+                }
+            )
+        return suscripcion, creada, transaccion_id
+
 
 class PlanSuscripcion(models.Model):
     nombre_plan = models.CharField(max_length=100, help_text="Ej: Básico, Premium, VIP")
@@ -33,6 +50,8 @@ class Suscripcion(models.Model):
     estado = models.CharField(max_length=20, choices=Estados.choices, default=Estados.ACTIVA)
     transaccion_pasarela_id = models.CharField(max_length=100, blank=True, null=True, help_text="ID del pago en Stripe/PayPal")
 
+    objects = SuscripcionManager()
+
     def __str__(self):
         return f"{self.usuario.username} - {self.plan.nombre_plan} [{self.estado}]"
 
@@ -43,3 +62,10 @@ class Suscripcion(models.Model):
             self.save()
             return False
         return self.estado == 'ACTIVA'
+
+    def puede_publicar_producto(self, total_productos_actuales):
+        if not self.verificar_vigencia():
+            return False, 'Tu suscripción ha vencido. Renueva tu plan para publicar más productos.'
+        if total_productos_actuales >= self.plan.limite_productos:
+            return False, f'Has alcanzado el límite de tu plan ({self.plan.limite_productos} productos). Mejora tu suscripción para publicar más.'
+        return True, ''

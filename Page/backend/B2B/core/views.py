@@ -321,28 +321,14 @@ class CheckoutView(LoginRequiredMixin, View):
         pedidos_creados = []
 
         try:
-            with transaction.atomic():
-                agrupados = carrito.agrupar_por_proveedor()
-
-                for prov_id, grupo in agrupados.items():
-                    nuevo_pedido = Pedido.objects.create(
-                        cliente=request.user,
-                        total=grupo['total_proveedor'],
-                        direccion_entrega_final=direccion,
-                        notas_pedido=notas,
-                        estado=Pedido.EstadosPedido.PENDIENTE,
-                    )
-                    for item in grupo['items']:
-                        producto = get_object_or_404(Producto, id=item['producto_id'])
-                        DetallePedido.objects.create(
-                            pedido=nuevo_pedido,
-                            producto=producto,
-                            cantidad=item['cantidad'],
-                            precio_unitario_guardado=item['precio_unitario'],
-                        )
-                    pedidos_creados.append(nuevo_pedido.id)
-
-                carrito.vaciar()
+            agrupados = carrito.agrupar_por_proveedor()
+            pedidos_creados = Pedido.objects.crear_desde_carrito(
+                cliente=request.user,
+                carrito_agrupado=agrupados,
+                direccion=direccion,
+                notas=notas
+            )
+            carrito.vaciar()
 
         except Exception as e:
             messages.error(request, f'Error al procesar el pedido: {str(e)}')
@@ -355,6 +341,7 @@ class CheckoutView(LoginRequiredMixin, View):
             f'orden(es) separada(s): {ids_str}.'
         )
         return redirect('dashboard')
+
 
 
 # ============================================================================
@@ -381,11 +368,7 @@ class DashboardView(LoginRequiredMixin, View):
         }
 
         # ── MIS COMPRAS (todos los roles autenticados ven sus propias compras) ──
-        mis_compras = Pedido.objects.filter(
-            cliente=user
-        ).order_by('-fecha_pedido').prefetch_related(
-            'detalles__producto__proveedor'
-        )
+        mis_compras = Pedido.objects.compras_de(user)
         context.update({
             'mis_compras': mis_compras,
             'compras_pendientes': mis_compras.filter(estado='PENDIENTE').count(),
@@ -399,12 +382,7 @@ class DashboardView(LoginRequiredMixin, View):
             ).select_related('categoria').order_by('-fecha_creacion')
 
             # Pedidos que contienen al menos un producto de este proveedor
-            mis_ventas = Pedido.objects.filter(
-                detalles__producto__proveedor=user
-            ).distinct().order_by('-fecha_pedido').prefetch_related(
-                'detalles__producto',
-                'cliente'
-            )
+            mis_ventas = Pedido.objects.ventas_de(user)
 
             context.update({
                 'mis_ventas': mis_ventas,
@@ -418,11 +396,7 @@ class DashboardView(LoginRequiredMixin, View):
 
         # ── PANEL ADMIN: Empresas Pendientes de Verificación ─────────────────
         if user.is_superuser or user.rol == 'ADMIN':
-            empresas_pendientes = CustomUser.objects.filter(
-                rol__in=['MINORISTA', 'MAYORISTA'],
-                empresa_verificada=False
-            ).order_by('-date_joined')
-            context['empresas_pendientes'] = empresas_pendientes
+            context['empresas_pendientes'] = CustomUser.objects.empresas_pendientes()
 
         return render(request, self.template_name, context)
 
@@ -458,34 +432,14 @@ class ActualizarEstadoPedidoView(LoginRequiredMixin, View):
         # ── Obtener el pedido o 404 ───────────────────────────────────────────
         pedido = get_object_or_404(Pedido, id=pedido_id)
 
-        # ── Verificación de propiedad (anti-IDOR) ─────────────────────────────
-        es_dueno = pedido.detalles.filter(producto__proveedor=user).exists()
-        es_cliente = (pedido.cliente == user)
+        # ── Actualizar estado a través del modelo ─────────────────────────────
+        exito, mensaje = pedido.actualizar_estado(nuevo_estado, user)
+        
+        if exito:
+            messages.success(request, f'✅ Pedido #{pedido.id} actualizado: {mensaje}')
+        else:
+            messages.error(request, mensaje)
 
-        if not es_dueno and not es_cliente and not user.is_superuser:
-            messages.error(
-                request,
-                f'No puedes actualizar el Pedido #{pedido.id}: no tienes permisos.'
-            )
-            return redirect('dashboard')
-
-        if es_cliente and not es_dueno and not user.is_superuser:
-            if nuevo_estado != 'CANCELADO':
-                messages.error(request, 'Solo puedes cancelar tu pedido, no puedes cambiarlo a otro estado.')
-                return redirect('dashboard')
-            if pedido.estado != 'PENDIENTE':
-                messages.error(request, 'Solo puedes cancelar pedidos que estén pendientes de aprobación.')
-                return redirect('dashboard')
-
-        # ── Actualizar estado ─────────────────────────────────────────────────
-        estado_anterior = pedido.get_estado_display()
-        pedido.estado = nuevo_estado
-        pedido.save(update_fields=['estado'])
-
-        messages.success(
-            request,
-            f'✅ Pedido #{pedido.id} actualizado: {estado_anterior} → {pedido.get_estado_display()}'
-        )
         return redirect('dashboard')
 
 
@@ -574,25 +528,9 @@ class InventarioMayoristaView(MayoristaRequiredMixin, View):
             # Verificación de límite de suscripción antes de guardar
             # ────────────────────────────────────────────────────────────────
             if suscripcion:
-                if not suscripcion.verificar_vigencia():
-                    messages.error(
-                        request,
-                        '❌ Tu suscripción ha vencido. Renueva tu plan para publicar más productos.'
-                    )
-                    return render(request, self.template_name, {
-                        'form': form,
-                        'mis_productos': mis_productos,
-                        'total_productos': mis_productos.count(),
-                        'suscripcion': suscripcion,
-                    })
-
-                if mis_productos.count() >= suscripcion.plan.limite_productos:
-                    messages.error(
-                        request,
-                        f'❌ Has alcanzado el límite de tu plan '
-                        f'({suscripcion.plan.limite_productos} productos). '
-                        f'Mejora tu suscripción para publicar más.'
-                    )
+                puede_publicar, mensaje = suscripcion.puede_publicar_producto(mis_productos.count())
+                if not puede_publicar:
+                    messages.error(request, f'❌ {mensaje}')
                     return render(request, self.template_name, {
                         'form': form,
                         'mis_productos': mis_productos,
@@ -753,21 +691,7 @@ class ActivarSuscripcionView(MayoristaRequiredMixin, View):
         plan = get_object_or_404(PlanSuscripcion, id=plan_id)
 
         try:
-            with transaction.atomic():
-                # ID de transacción simulado (en producción vendría de Stripe/PayPal)
-                transaccion_id = f'SIM-{uuid.uuid4().hex[:12].upper()}'
-
-                # Crea o actualiza la suscripción del usuario
-                suscripcion, creada = Suscripcion.objects.update_or_create(
-                    usuario=request.user,
-                    defaults={
-                        'plan': plan,
-                        'fecha_fin': date.today() + timedelta(days=30),
-                        'estado': Suscripcion.Estados.ACTIVA,
-                        'transaccion_pasarela_id': transaccion_id,
-                    }
-                )
-
+            suscripcion, creada, transaccion_id = Suscripcion.objects.activar_suscripcion(request.user, plan)
             accion = 'activada' if creada else 'renovada'
             messages.success(
                 request,
@@ -776,6 +700,7 @@ class ActivarSuscripcionView(MayoristaRequiredMixin, View):
                 f'Válido hasta: {suscripcion.fecha_fin.strftime("%d/%m/%Y")} | '
                 f'ID de transacción: {transaccion_id}'
             )
+
 
         except Exception as e:
             messages.error(request, f'Error al procesar la suscripción: {str(e)}')

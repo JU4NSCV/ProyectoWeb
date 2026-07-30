@@ -1,5 +1,40 @@
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
+from catalog.models import Producto
+
+class PedidoManager(models.Manager):
+    def compras_de(self, usuario):
+        return self.filter(cliente=usuario).order_by('-fecha_pedido').prefetch_related('detalles__producto__proveedor')
+        
+    def ventas_de(self, usuario):
+        return self.filter(detalles__producto__proveedor=usuario).distinct().order_by('-fecha_pedido').prefetch_related('detalles__producto', 'cliente')
+        
+    def crear_desde_carrito(self, cliente, carrito_agrupado, direccion, notas):
+        pedidos_creados = []
+        with transaction.atomic():
+            for prov_id, grupo in carrito_agrupado.items():
+                nuevo_pedido = self.create(
+                    cliente=cliente,
+                    total=grupo['total_proveedor'],
+                    direccion_entrega_final=direccion,
+                    notas_pedido=notas,
+                    estado=Pedido.EstadosPedido.PENDIENTE,
+                )
+                for item in grupo['items']:
+                    try:
+                        producto = Producto.objects.get(id=item['producto_id'])
+                    except Producto.DoesNotExist:
+                        raise ValueError(f"Producto {item['producto_id']} no encontrado.")
+                        
+                    DetallePedido.objects.create(
+                        pedido=nuevo_pedido,
+                        producto=producto,
+                        cantidad=item['cantidad'],
+                        precio_unitario_guardado=item['precio_unitario'],
+                    )
+                pedidos_creados.append(nuevo_pedido.id)
+        return pedidos_creados
+
 
 class Pedido(models.Model):
     # Estados lógicos para la gestión operativa (Módulo Backoffice)
@@ -27,6 +62,31 @@ class Pedido(models.Model):
     total = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     direccion_entrega_final = models.TextField(help_text="Dirección física exacta para este despacho")
     notas_pedido = models.TextField(blank=True, null=True, help_text="Instrucciones especiales")
+
+    objects = PedidoManager()
+
+    def actualizar_estado(self, nuevo_estado, usuario):
+        estados_validos = [e[0] for e in self.EstadosPedido.choices]
+        if nuevo_estado not in estados_validos:
+            return False, f'Estado inválido: "{nuevo_estado}".'
+
+        es_dueno = self.detalles.filter(producto__proveedor=usuario).exists()
+        es_cliente = (self.cliente == usuario)
+
+        if not es_dueno and not es_cliente and not usuario.is_superuser:
+            return False, f'No tienes permisos para actualizar este pedido.'
+
+        if es_cliente and not es_dueno and not usuario.is_superuser:
+            if nuevo_estado != 'CANCELADO':
+                return False, 'Solo puedes cancelar tu pedido, no puedes cambiarlo a otro estado.'
+            if self.estado != 'PENDIENTE':
+                return False, 'Solo puedes cancelar pedidos que estén pendientes de aprobación.'
+
+        estado_anterior = self.get_estado_display()
+        self.estado = nuevo_estado
+        self.save(update_fields=['estado'])
+        return True, f'{estado_anterior} → {self.get_estado_display()}'
+
 
     def __str__(self):
         return f"Pedido #{self.id} - {self.cliente.username} ({self.get_estado_display()})"

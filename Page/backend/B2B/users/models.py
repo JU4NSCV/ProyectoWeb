@@ -1,7 +1,15 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
+
+class CustomUserManager(UserManager):
+    def empresas_pendientes(self):
+        return self.filter(
+            rol__in=['MINORISTA', 'MAYORISTA'],
+            empresa_verificada=False
+        ).order_by('-date_joined')
 
 class CustomUser(AbstractUser):
+
     # 1. Definición de Roles (Opciones fijas)
     class Roles(models.TextChoices):
         VISITANTE = 'VISITANTE', 'Visitante'
@@ -37,5 +45,8 @@ class CustomUser(AbstractUser):
         help_text="Indica si el admin ya revisó el RUC y aprobó a esta empresa"
     )
     documento_verificacion = models.FileField(upload_to='documentos_fiscales/', blank=True, null=True, help_text="Sube RUC o Patente Comercial")
+    
+    objects = CustomUserManager()
+    
     def __str__(self):
         return f"{self.username} - {self.get_rol_display()}"
