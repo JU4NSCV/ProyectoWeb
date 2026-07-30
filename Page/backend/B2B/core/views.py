@@ -510,11 +510,14 @@ class InventarioMayoristaView(MayoristaRequiredMixin, View):
         form = ProductoForm()
         mis_productos = self._get_mis_productos(request)
         suscripcion = self._get_suscripcion(request)
+        categorias = Categoria.objects.all()
         context = {
             'form': form,
             'mis_productos': mis_productos,
             'total_productos': mis_productos.count(),
             'suscripcion': suscripcion,
+            'categorias': categorias,
+            'filtros': request.GET,
         }
         return render(request, self.template_name, context)
 
@@ -571,9 +574,39 @@ class InventarioMayoristaView(MayoristaRequiredMixin, View):
 
     def _get_mis_productos(self, request):
         """Retorna SOLO los productos del mayorista logueado, nunca los de otros."""
-        return Producto.objects.filter(
-            proveedor=request.user
-        ).select_related('categoria').order_by('-fecha_creacion')
+        queryset = Producto.objects.filter(proveedor=request.user).select_related('categoria')
+        
+        # Filtros
+        categoria = request.GET.get('categoria')
+        nombre = request.GET.get('nombre')
+        stock_min = request.GET.get('stock_min')
+        stock_max = request.GET.get('stock_max')
+        precio_min = request.GET.get('precio_min')
+        precio_max = request.GET.get('precio_max')
+        estado = request.GET.get('estado')
+        lote = request.GET.get('lote')
+        
+        if categoria:
+            queryset = queryset.filter(categoria_id=categoria)
+        if nombre:
+            queryset = queryset.filter(nombre__icontains=nombre)
+        if stock_min:
+            queryset = queryset.filter(stock_disponible__gte=stock_min)
+        if stock_max:
+            queryset = queryset.filter(stock_disponible__lte=stock_max)
+        if precio_min:
+            # Filtramos por precio B2B (minorista) que es el relevante para el catálogo B2B
+            queryset = queryset.filter(precio_minorista__gte=precio_min)
+        if precio_max:
+            queryset = queryset.filter(precio_minorista__lte=precio_max)
+        if estado == 'activo':
+            queryset = queryset.filter(activo=True)
+        elif estado == 'inactivo':
+            queryset = queryset.filter(activo=False)
+        if lote:
+            queryset = queryset.filter(multiplo_lote=lote)
+            
+        return queryset.order_by('-fecha_creacion')
 
     def _get_suscripcion(self, request):
         """Retorna la suscripción activa del mayorista, o None si no tiene."""
